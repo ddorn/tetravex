@@ -1,4 +1,4 @@
-# Teravex - Matinfoly 2019
+# Tetravex - Matinfoly 2019
 
 
 By Alexia, Diego, Elias, Romain et Yohann
