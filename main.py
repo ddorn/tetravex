@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 """
 Solver for Tetravex.
 
@@ -5,7 +7,7 @@ Solver for Tetravex.
 Convention for SAT variables names:
     Each variable encode a position and a tile.
     Let t be the tile number (between 1 and n*n).
-    Let p be the position on the board, increasing right then down.
+    Let p be the position on the board, increasing in reading order.
     The variable corresponding to "The tile t is at p" is p * NTILES + t.
     Therefore if n is a variable, one can extract t and p.
         t = n % NTILES
@@ -19,7 +21,7 @@ Matinfoly 2019.
 
 
 END = ' 0\n'
-NTILES = 0
+NTILES = 4
 
 
 def print0(*args, **kwargs):
@@ -30,34 +32,71 @@ def print0(*args, **kwargs):
 
 def dim(p, t):
     """Convert a (position, tile) tuple to a dimacs variable name."""
-    return p * NTILES + t
+    return p * NTILES + t + 1
 
 
-def psc(dim):
+def pt(dim):
     """Convert a dimacs variable id to a (position, tile) tuple."""
-    return (dim % NTILES, dim // NTILES)
+    return divmod(dim - 1, NTILES)
 
 
-def gen_unique_tiles_on_spot(n, t):
+def gen_unique_tiles_on_spot(n):
     """
     Each position must have only one tile.
     This generates the CNF describing this.
     """
 
     # for all position there is a tile
-    for p in range(n*n):
+    # yield "c There is a tile at each position 0",
+
+    for p in range(NTILES):
         # p1 or p2 or ...
-        print0(*(dim(p, ti, t) for ti in range(t)))
+        yield tuple(dim(p, ti) for ti in range(n))
 
     # there are not two true at the same time (#uniquness)
-    for p in range(n*n):
-        for t1 in range(t):
-            for t2 in range(t1+1, t):
-                print0(-dim(p, t1), -dim(p, t2))
+    # yield "c place unique tile",
+    for p in range(NTILES):
+        for t1 in range(NTILES):
+            for t2 in range(t1+1, NTILES):
+                yield -dim(p, t1), -dim(p, t2)
+
+    # Each tile is on only one spot
+    # yield "c tile unique place",
+    for t in range(NTILES):
+        for p1 in range(NTILES):
+            for p2 in range(p1 + 1, NTILES):
+                yield -dim(p1, t), -dim(p2, t)
 
 
-def gen_adjacents(n, c):
-    ...
+def gen_adjacents(h, l, c, tiles):
+    right_incomp = [[] for _ in range(NTILES)]
+    bottom_incomp = [[] for _ in range(NTILES)]
+
+    for i, t1 in enumerate(tiles):
+        for j, t2 in enumerate(tiles):
+            if i != j:
+                if t1[1] != t2[3]:
+                    right_incomp[i].append(j)
+                if t1[2] != t2[0]:
+                    bottom_incomp[i].append(j)
+    # yield "c", right_incomp
+    # yield "c", bottom_incomp
+
+    for p in range(NTILES):
+        i, j = divmod(p, l)
+        for t1 in range(NTILES):
+            # Si on est dans la dernière colonne, pas besoin
+            # de verifier la compat a droite.
+            if j != l - 1:
+                for t2 in right_incomp[t1]:
+                    # yield 'c', '-'*20, p+1, t
+                    yield (-dim(p,t1), -dim(p+1, t2))
+
+            # Si on est dans la dernière ligne, pas besoin
+            # de verifier la compat en bas.
+            if i != h - 1:
+                for t2 in bottom_incomp[t1]:
+                    yield (-dim(p, t1), -dim(p + l, t2))
 
 
 def main():
@@ -70,17 +109,22 @@ def main():
         c1 c2 c3 c4: (n*n lines) top, right, bottom and left side of a tile.
     """
 
+    global NTILES
     # input
 
-    n = int(input())
+    h, l = map(int, input().split())
+    NTILES = h * l
     c = int(input())
-    tiles = [list(map(int, input().split())) for _ in range(n*n)]
+    tiles = [list(map(int, input().split())) for _ in range(NTILES)]
 
     # generate DIMACS on stdout
 
-    print("HEADER")
-    gen_unique_tiles_on_spot(n, c)
-    gen_adjacents(n, c)
+    a = list(gen_unique_tiles_on_spot(h*l))
+    b = list(gen_adjacents(h, l, c, tiles))
+
+    print("p cnf", NTILES * NTILES, len(a) + len(b))
+    for c in a + b:
+        print(*c, 0)
 
 
 if __name__ == '__main__':
