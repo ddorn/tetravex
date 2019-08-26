@@ -19,15 +19,10 @@ Convention for SAT variables names:
 Matinfoly 2019.
 """
 
+import os
 
 END = ' 0\n'
 NTILES = 4
-
-
-def print0(*args, **kwargs):
-    """Print anything with a 0 and a newline at the end"""
-    kwargs.update(end=END)
-    print(*args, **kwargs)
 
 
 def dim(p, t):
@@ -117,15 +112,38 @@ def main():
     c = int(input())
     tiles = [list(map(int, input().split())) for _ in range(NTILES)]
 
-    # generate DIMACS on stdout
+    # generate a list of clause for the DIMACS file
 
     a = list(gen_unique_tiles_on_spot(h*l))
     b = list(gen_adjacents(h, l, c, tiles))
+    clauses = a + b
 
-    print("p cnf", NTILES * NTILES, len(a) + len(b))
-    for c in a + b:
-        print(*c, 0)
+    # Write the DIMACS file.
 
+    with open('in', 'w') as f:
+        print("p cnf", NTILES * NTILES, len(clauses), file=f)
+        for c in a + b:
+            print(*c, 0, file=f)
+
+    # Let the SAT solver run !
+    os.system("glucose in out")
+
+    with open('out', 'r') as f:
+        out = f.read()
+
+    # Parsing the result
+    if 'UNSAT' in out:
+        print('No solution!')
+        return
+    values = map(int, out.split())
+    pairs = {}
+    for v in values:
+        if v > 0:
+            p, t = pt(v)
+            pairs[t] = p
+
+    for i in range(NTILES):
+        print(f'Tile {i + 1} is at ({pairs[i] % l}, {pairs[i] // l}).')
 
 if __name__ == '__main__':
     main()
