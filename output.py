@@ -96,10 +96,9 @@ def print_game(h, l, c, tiles, order=None):
     """
 
     colors = [(0,0,0)] + list(gen_colors(c))
-    print(order)
-    print(h*l)
+
     if order:
-        tiles = [tiles[order[print(i) or i]] for i in range(h*l)]
+        tiles = [tiles[order[i]] for i in range(h*l)]
     else:
         order = list(range(h*l))
 
