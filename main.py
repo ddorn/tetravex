@@ -20,6 +20,7 @@ Matinfoly 2019.
 """
 
 import os
+from output import print_game
 
 END = ' 0\n'
 NTILES = 4
@@ -122,8 +123,8 @@ def main():
 
     with open('in', 'w') as f:
         print("p cnf", NTILES * NTILES, len(clauses), file=f)
-        for c in a + b:
-            print(*c, 0, file=f)
+        for clause in a + b:
+            print(*clause, 0, file=f)
 
     # Let the SAT solver run !
     os.system("glucose in out")
@@ -140,10 +141,11 @@ def main():
     for v in values:
         if v > 0:
             p, t = pt(v)
-            pairs[t] = p
+            pairs[p] = t
 
-    for i in range(NTILES):
-        print(f'Tile {i + 1} is at ({pairs[i] % l}, {pairs[i] // l}).')
+    print_game(h, l, c, [tiles[pairs[p]] for p in range(NTILES)])
+    # for i in range(NTILES):
+    #     print(f'Tile {i + 1} is at ({pairs[i] % l}, {pairs[i] // l}).')
 
 if __name__ == '__main__':
     main()
