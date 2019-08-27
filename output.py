@@ -9,7 +9,7 @@ TL = '◤'
 TR = '◥'
 BLC = '█' * 2
 BLACK = (0, 0, 0)
-
+WHITE = (255, 255, 255)
 
 def gen_colors(nb):
     """Generate n bright distinct RGB triplets"""
@@ -29,7 +29,7 @@ def pprint(txt, fg, bg, end=''):
     print(f"\033[48;2;{bg[0]};{bg[1]};{bg[2]};38;2;{fg[0]};{fg[1]};{fg[2]}m{txt}\033[m", end=end)
 
 
-def print_tile(tile, y, n=6):
+def print_tile(tile, y, n=6, label=None):
     t, r, b, l = tile
 
 
@@ -44,6 +44,9 @@ def print_tile(tile, y, n=6):
                 printfg(BLC, l)
 
         elif x == y:
+            if x == h and label is not None:
+                printfg((str(label) + '  ')[:2], WHITE)
+            else:
                 printfg(BLC, BLACK)
 
         else:
@@ -77,7 +80,7 @@ def print_tile(tile, y, n=6):
 #                 printfg(BLC, t)
 
 
-def print_game(h, l, c, tiles):
+def print_game(h, l, c, tiles, order=None):
     """
     Print a Tetravex board.
 
@@ -93,6 +96,11 @@ def print_game(h, l, c, tiles):
     """
 
     colors = [(0,0,0)] + list(gen_colors(c))
+    if order:
+        tiles = [tiles[order[i]] for i in range(h*c)]
+    else:
+        order = list(range(h*c))
+
     tiles = [
         [colors[i + 1] for i in tile]
         for tile in tiles
@@ -103,7 +111,8 @@ def print_game(h, l, c, tiles):
         for line in range(LINES):
             for x in range(l):
                 tile = tiles[y * l + x]
-                print_tile(tile, line, LINES)
+                print_tile(tile, line, LINES, label=order[y*l + x])
+
                 print(end='  ')
             print()
         print()

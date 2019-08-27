@@ -106,6 +106,7 @@ def main():
     """
 
     global NTILES
+
     # input
 
     h, l = map(int, input().split())
@@ -146,7 +147,7 @@ def main():
             p, t = pt(v)
             pairs[p] = t
 
-    print_game(h, l, c, [tiles[pairs[p]] for p in range(NTILES)])
+    print_game(h, l, c, tiles, pairs) # [tiles[pairs[p]] for p in range(NTILES)], )
     # for i in range(NTILES):
     #     print(f'Tile {i + 1} is at ({pairs[i] % l}, {pairs[i] // l}).')
 
