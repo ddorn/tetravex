@@ -113,6 +113,9 @@ def main():
     c = int(input())
     tiles = [list(map(int, input().split())) for _ in range(NTILES)]
 
+    print('Input:')
+    print_game(h, l, c, tiles)
+
     # generate a list of clause for the DIMACS file
 
     a = list(gen_unique_tiles_on_spot(h*l))
