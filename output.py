@@ -8,6 +8,7 @@ BR = '◣'
 TL = '◤'
 TR = '◥'
 BLC = '█' * 2
+BLACK = (0, 0, 0)
 
 
 def gen_colors(nb):
@@ -31,27 +32,49 @@ def pprint(txt, fg, bg, end=''):
 def print_tile(tile, y, n=6):
     t, r, b, l = tile
 
+
     h = n // 2
     for x in range(n):
-        if x <= y - (x >= h):
-            if n - x <= y + 1:
+        if x < y:
+            if n - x < y + 1:
                 printfg(BLC, b)
-            # elif n - x - 1 == y:
-            #     pprint(BL, b, l)
+            elif n - x == y + 1:
+                printfg(BLC, BLACK)
             else:
                 printfg(BLC, l)
-        # elif x == y:
-        #     if x < n/2:
-        #         pprint(TR, t, l)
-        #     else:
-        #         pprint(BR, b, r)
+
+        elif x == y:
+                printfg(BLC, BLACK)
+
         else:
             if n - x - 1 < y:
                 printfg(BLC, r)
-            # elif n - x - 1 == y:
-            #     pprint(TL, t, r)
+            elif n - x - 1 == y:
+                printfg(BLC, BLACK)
             else:
                 printfg(BLC, t)
+
+#     h = n // 2
+#     for x in range(n):
+#         if x <= y - (x >= h):
+#             if n - x <= y + 1:
+#                 printfg(BLC, b)
+#             # elif n - x - 1 == y:
+#             #     pprint(BL, b, l)
+#             else:
+#                 printfg(BLC, l)
+#         # elif x == y:
+#         #     if x < n/2:
+#         #         pprint(TR, t, l)
+#         #     else:
+#         #         pprint(BR, b, r)
+#         else:
+#             if n - x - 1 < y:
+#                 printfg(BLC, r)
+#             # elif n - x - 1 == y:
+#             #     pprint(TL, t, r)
+#             else:
+#                 printfg(BLC, t)
 
 
 def print_game(h, l, c, tiles):
@@ -75,7 +98,7 @@ def print_game(h, l, c, tiles):
         for tile in tiles
     ]
 
-    LINES = 6
+    LINES = 7
     for y in range(h):
         for line in range(LINES):
             for x in range(l):
