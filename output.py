@@ -16,8 +16,8 @@ def gen_colors(nb):
 
     for i in range(nb):
         # prop around the circle
-        p = i / nb
-        rgb = colorsys.hsv_to_rgb(p, 1, 1)
+        p = i / nb + 0.82
+        rgb = colorsys.hsv_to_rgb(p % 1, 1, 1)
         yield tuple(round(255*c) for c in rgb)
 
 
@@ -96,10 +96,12 @@ def print_game(h, l, c, tiles, order=None):
     """
 
     colors = [(0,0,0)] + list(gen_colors(c))
+    print(order)
+    print(h*l)
     if order:
-        tiles = [tiles[order[i]] for i in range(h*c)]
+        tiles = [tiles[order[print(i) or i]] for i in range(h*l)]
     else:
-        order = list(range(h*c))
+        order = list(range(h*l))
 
     tiles = [
         [colors[i + 1] for i in tile]
@@ -107,16 +109,32 @@ def print_game(h, l, c, tiles, order=None):
     ]
 
     LINES = 7
+
+    print(end='╔')
+    for x in range(l):
+        print('═'*LINES*2, end='╤' if x != l-1 else '╗')
+    print()
+
     for y in range(h):
         for line in range(LINES):
+            print(end='║')
             for x in range(l):
                 tile = tiles[y * l + x]
                 print_tile(tile, line, LINES, label=order[y*l + x])
 
-                print(end='  ')
+                print(end='║' if x == l-1 else '│')
             print()
-        print()
 
+        if y != h-1:
+            print(end='╟')
+            for x in range(l):
+                print('─'*LINES*2, end='┼' if x != l-1 else '╢')
+            print()
+
+    print(end='╚')
+    for x in range(l):
+        print('═'*LINES*2, end='╧' if x != l-1 else '╝')
+    print()
 
 
 # 0x25e5 ◥
