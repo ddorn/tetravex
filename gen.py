@@ -11,11 +11,8 @@ By Alexia Gross
 import random
 import click
 
-@click.command()
-@click.argument('height', default=4)
-@click.argument('width', default=4)
-@click.argument('colors', default=4)
-def generate(height, width, colors):
+
+def gen(height, width, colors):
     """
     Generate a doable HEIGHTxWIDTH Tetravex puzzle with COLORS colors.
     """
@@ -28,8 +25,6 @@ def generate(height, width, colors):
 
     grille=[[0,0,0,0] for t in range (size)]  #4 couleurs pour une tuile
     c = colors - 1
-    print(height, width)
-    print(colors)
 
     for i in range (size):
         colonne = i % width
@@ -50,9 +45,20 @@ def generate(height, width, colors):
 
     random.shuffle(grille)
 
-    for t in grille:
-        print(*t)
+    return grille
 
+@click.command()
+@click.argument('height', default=4)
+@click.argument('width', default=4)
+@click.argument('colors', default=4)
+def generate(height, width, colors):
+    grid = gen(height, width, colors)
+
+    # output on stdout
+    print(width, height)
+    print(colors)
+    for t in grid:
+        print(*t)
 
 if __name__ == '__main__':
     generate()
