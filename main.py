@@ -113,7 +113,7 @@ def solve(h, l, c, tiles):
 
     # generate a list of clause for the DIMACS file
 
-    a = list(gen_unique_tiles_on_spot(h*l))
+    a = list(gen_unique_tiles_on_spot(nb_tiles))
     b = list(gen_adjacents(h, l, c, tiles))
     clauses = a + b
 
@@ -121,7 +121,7 @@ def solve(h, l, c, tiles):
 
     with open('in', 'w') as f:
         print("p cnf", nb_tiles * nb_tiles, len(clauses), file=f)
-        for clause in a + b:
+        for clause in clauses:
             print(*clause, 0, file=f)
 
     # Let the SAT solver run !
