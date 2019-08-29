@@ -17,6 +17,10 @@ import matplotlib.pyplot as plt
 from main import solve
 from gen import gen
 
+def mean(xs):
+    if xs:
+        return sum(xs) / len(xs)
+    return 0
 
 def replace_int(string, **x):
     print(string, x)
@@ -28,13 +32,12 @@ def replace_int(string, **x):
 def generate_params_from_pattern(pattern, start, end):
     pattern = pattern.split()
 
-    terms = [s for s in pattern if not s.isnumeric()]
-    terms.sort()
+    terms = list(set(s for s in pattern if not s.isnumeric()))
     yield terms
 
     product = itertools.product(*[range(start, end) for t in terms])
     for parms in product:
-        yield list(map(lambda s: replace_int(s, **{t: v for t,v in zip(terms, parms)}), pattern))
+        yield tuple(map(lambda s: replace_int(s, **{t: v for t,v in zip(terms, parms)}), pattern))
 
 
 @click.command()
@@ -46,7 +49,8 @@ def main(pattern, repetitions, start, end):
     variables, *params_list = list(generate_params_from_pattern(pattern, start, end))
     print(params_list, variables)
 
-    times = []
+    times = defaultdict(list)
+
     for params in params_list:
         puzzle = gen(*params)
 
@@ -58,30 +62,34 @@ def main(pattern, repetitions, start, end):
             end_time = time()
 
             total += end_time - start_time
+            times[params].append(end_time - start_time)
 
-        times.append(total / repetitions)
+        # times.append(total / repetitions)
 
     print()
-    for data in zip(params_list, times):
+    for data in zip(params_list, times.values()):
         print(*data)
 
-    abs_label = 1
-    f = [(l.pop(abs_label), l, value) for l, value in zip(params_list, times)]
+    abs_label = 2
     d = defaultdict(list)
+    for l, value in times.items():
+        x = l[abs_label]
+        y = value
+        name = l[:abs_label] + l[abs_label + 1:]
 
-    for x, name, y in f:
-        d[tuple(name)].append((x, y))
-
-    print(d)
+        d[name].append((x, y))
 
     for name, xys in d.items():
-        print(name, xys)
-        xs = [a for a, b in xys]
-        ys = [b for a, b in xys]
+
         name = list(name)
         name.insert(abs_label, 'x')
         name = str(tuple(name)).replace("'x'", 'x')
-        plt.plot(xs, ys, label=name)
+
+        xs = [x for x, d in xys]
+        ys = [y for x, y in xys]
+        print(name)
+        plt.boxplot(ys, positions=xs, widths=0.03, )
+        plt.plot(xs, list(map(mean, ys)), label=name)
 
     plt.legend()
     plt.show()
