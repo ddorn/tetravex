@@ -150,6 +150,11 @@ def main():
     print_game(h, l, c, tiles, pairs) # [tiles[pairs[p]] for p in range(NTILES)], )
     # for i in range(NTILES):
     #     print(f'Tile {i + 1} is at ({pairs[i] % l}, {pairs[i] // l}).')
+    with open("output", "w") as f:
+        f.write(str(h) + " " + str(l) + "\n")
+        f.write(str(c) + "\n")
+        for p in range(len(tiles)):
+            f.write(" ".join(map(str, tiles[pairs[p]])) + "\n")
 
 if __name__ == '__main__':
     main()
