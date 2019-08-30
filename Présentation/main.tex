@@ -1,0 +1,752 @@
+\documentclass[aspectratio=43,11pt,hyperref={pdfpagemode=FullScreen}]{beamer}
+
+\usetheme{Warsaw}
+\usepackage[utf8]{inputenc}
+\usepackage[french]{babel}
+\usepackage[T1]{fontenc}
+
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+\usepackage{graphicx}
+\usepackage{amsthm}
+\usepackage{tcolorbox}
+\usepackage{pgf,tikz,pgfplots}
+\usepackage{mathrsfs}
+\usepackage{pgffor}
+%\usepackage{enumitem}
+\usepackage{multicol}
+\usepackage{xcolor}
+\usepackage{fancyhdr}
+\usepackage{hyperref}
+\usepackage{svg}
+\usepackage{wrapfig}
+
+\usetikzlibrary{calc,trees,positioning,arrows,chains,shapes.geometric,%
+    decorations.pathreplacing,decorations.pathmorphing,shapes,%
+    matrix,shapes.symbols}
+    
+%\graphicspath{D:/LATEX/Reports@IIT/figures}
+
+\tikzset{
+>=stealth',
+  punktchain/.style={
+    rectangle, 
+    rounded corners, 
+    % fill=black!10,
+    draw=black, very thick,
+    text width=7em, 
+    minimum height=2em, 
+    text centered, 
+    on chain},
+  line/.style={draw, thick, <-},
+  element/.style={
+    tape,
+    top color=white,
+    bottom color=blue!50!black!60!,
+    minimum width=8em,
+    draw=blue!40!black!90, very thick,
+    text width=10em, 
+    minimum height=3.5em, 
+    text centered, 
+    on chain},
+  every join/.style={->, thick,shorten >=1pt},
+  decoration={brace},
+  tuborg/.style={decorate},
+  tubnode/.style={midway, right=2pt},
+}
+
+\usetikzlibrary{arrows}
+\pgfplotsset{compat=1.15}
+
+\author{Alexia GROSS, Diego DORN, Elias SUVANTO, Romain AGERON, Yohann D'ANELLO}
+\title{Tetravex}
+%\setbeamercovered{transparent} 
+\setbeamertemplate{navigation symbols}{} 
+%\setbeamertemplate{footline}[frame number]
+%\logo{} 
+%\institute{} 
+\date{30 août 2019 -- Lyon} 
+%\subject{} 
+
+\setbeamertemplate{footline}{
+\leavevmode%
+\hbox{\hspace*{-0.06cm}
+\begin{beamercolorbox}[wd=.2\paperwidth,ht=2.25ex,dp=1ex,center]{author in head/foot}%
+	\usebeamerfont{author in head/foot} {Mathinfoly 2019}%~~(\insertshortinstitute)
+\end{beamercolorbox}%
+\begin{beamercolorbox}[wd=.6\paperwidth,ht=2.25ex,dp=1ex,center]{section in head/foot}%
+	\usebeamerfont{section in head/foot}\insertshorttitle
+\end{beamercolorbox}%
+\begin{beamercolorbox}[wd=.2\paperwidth,ht=2.25ex,dp=1ex,right]{section in head/foot}%
+	\usebeamerfont{section in head/foot}
+	\insertframenumber{} / \inserttotalframenumber\hspace*{2ex}
+\end{beamercolorbox}}%
+\vskip0pt%
+}
+
+\usecolortheme{seahorse}
+
+\begin{document}
+\begin{frame}{}
+\titlepage
+
+\begin{minipage}{0.55 \linewidth}
+%\begin{center}
+\includegraphics[scale=0.2]{Logo_Mathinfoly.png}
+%\end{center}
+\end{minipage}\hfill
+\begin{minipage}{0.3 \linewidth}
+\begin{flushright}
+{\tiny Copyright \copyright{} 2007 Free Software Foundation.}
+\end{flushright} 
+\end{minipage}
+
+
+\end{frame}
+
+\begin{frame}{}
+\tableofcontents
+\end{frame}
+
+\section{Introduction}
+
+\subsection{Présentation du jeu}
+
+\begin{frame}{Présentation du jeu}
+\begin{itemize}
+    \item Jeu de plateau solitaire
+    \pause
+    \item BUT : Grille de $m \times n$ cases à remplir avec des tuiles
+    \pause
+    \item Tuiles composées de 4 couleurs, une couleur par arête
+    \pause
+    \item Deux tuiles peuvent être adjacentes dans la grille si leurs arêtes en contact sont de même couleur
+\end{itemize}
+\end{frame}
+
+\subsection{Exemple}
+
+\begin{frame}{Exemple}
+
+\begin{figure}[h!]
+\begin{center}
+\begin{tabular}{c c c}
+\begin{tikzpicture}[line cap=round,line join=round,>=triangle 45,x=0.8cm,y=0.8cm]
+   \draw [black, fill={rgb,255:red,255; green,107; blue,0 }] (4.0, 0.0) -- (4.0, 1.0) -- (3.5, 0.5) -- cycle;
+   \draw [black, fill={rgb,255:red,255; green,107; blue,0 }] (4.0, 1.0) -- (3.0, 1.0) -- (3.5, 0.5) -- cycle;
+   \draw [black, fill={rgb,255:red,0; green,148; blue,255 }] (3.0, 1.0) -- (3.0, 0.0) -- (3.5, 0.5) -- cycle;
+   \draw [black, fill={rgb,255:red,235; green,0; blue,255 }] (3.0, 0.0) -- (4.0, 0.0) -- (3.5, 0.5) -- cycle;
+   \draw [black, fill={rgb,255:red,235; green,0; blue,255 }] (4.0, 1.2) -- (4.0, 2.2) -- (3.5, 1.7) -- cycle;
+   \draw [black, fill={rgb,255:red,20; green,255; blue,0 }] (4.0, 2.2) -- (3.0, 2.2) -- (3.5, 1.7) -- cycle;
+   \draw [black, fill={rgb,255:red,0; green,148; blue,255 }] (3.0, 2.2) -- (3.0, 1.2) -- (3.5, 1.7) -- cycle;
+   \draw [black, fill={rgb,255:red,235; green,0; blue,255 }] (3.0, 1.2) -- (4.0, 1.2) -- (3.5, 1.7) -- cycle;
+   \draw [black, fill={rgb,255:red,255; green,107; blue,0 }] (4.0, 2.4) -- (4.0, 3.4) -- (3.5, 2.9) -- cycle;
+   \draw [black, fill={rgb,255:red,235; green,0; blue,255 }] (4.0, 3.4) -- (3.0, 3.4) -- (3.5, 2.9) -- cycle;
+   \draw [black, fill={rgb,255:red,235; green,0; blue,255 }] (3.0, 3.4) -- (3.0, 2.4) -- (3.5, 2.9) -- cycle;
+   \draw [black, fill={rgb,255:red,0; green,148; blue,255 }] (3.0, 2.4) -- (4.0, 2.4) -- (3.5, 2.9) -- cycle;
+   \draw [black, fill={rgb,255:red,235; green,0; blue,255 }] (4.0, 3.5999999999999996) -- (4.0, 4.6) -- (3.5, 4.1) -- cycle;
+   \draw [black, fill={rgb,255:red,20; green,255; blue,0 }] (4.0, 4.6) -- (3.0, 4.6) -- (3.5, 4.1) -- cycle;
+   \draw [black, fill={rgb,255:red,255; green,107; blue,0 }] (3.0, 4.6) -- (3.0, 3.5999999999999996) -- (3.5, 4.1) -- cycle;
+   \draw [black, fill={rgb,255:red,20; green,255; blue,0 }] (3.0, 3.5999999999999996) -- (4.0, 3.5999999999999996) -- (3.5, 4.1) -- cycle;
+   \draw [black, fill={rgb,255:red,255; green,107; blue,0 }] (2.8, 0.0) -- (2.8, 1.0) -- (2.3, 0.5) -- cycle;
+   \draw [black, fill={rgb,255:red,255; green,107; blue,0 }] (2.8, 1.0) -- (1.7999999999999998, 1.0) -- (2.3, 0.5) -- cycle;
+   \draw [black, fill={rgb,255:red,20; green,255; blue,0 }] (1.7999999999999998, 1.0) -- (1.7999999999999998, 0.0) -- (2.3, 0.5) -- cycle;
+   \draw [black, fill={rgb,255:red,235; green,0; blue,255 }] (1.7999999999999998, 0.0) -- (2.8, 0.0) -- (2.3, 0.5) -- cycle;
+   \draw [black, fill={rgb,255:red,235; green,0; blue,255 }] (2.8, 1.2) -- (2.8, 2.2) -- (2.3, 1.7) -- cycle;
+   \draw [black, fill={rgb,255:red,235; green,0; blue,255 }] (2.8, 2.2) -- (1.7999999999999998, 2.2) -- (2.3, 1.7) -- cycle;
+   \draw [black, fill={rgb,255:red,235; green,0; blue,255 }] (1.7999999999999998, 2.2) -- (1.7999999999999998, 1.2) -- (2.3, 1.7) -- cycle;
+   \draw [black, fill={rgb,255:red,255; green,107; blue,0 }] (1.7999999999999998, 1.2) -- (2.8, 1.2) -- (2.3, 1.7) -- cycle;
+   \draw [black, fill={rgb,255:red,0; green,148; blue,255 }] (2.8, 2.4) -- (2.8, 3.4) -- (2.3, 2.9) -- cycle;
+   \draw [black, fill={rgb,255:red,0; green,148; blue,255 }] (2.8, 3.4) -- (1.7999999999999998, 3.4) -- (2.3, 2.9) -- cycle;
+   \draw [black, fill={rgb,255:red,0; green,148; blue,255 }] (1.7999999999999998, 3.4) -- (1.7999999999999998, 2.4) -- (2.3, 2.9) -- cycle;
+   \draw [black, fill={rgb,255:red,20; green,255; blue,0 }] (1.7999999999999998, 2.4) -- (2.8, 2.4) -- (2.3, 2.9) -- cycle;
+   \draw [black, fill={rgb,255:red,20; green,255; blue,0 }] (2.8, 3.5999999999999996) -- (2.8, 4.6) -- (2.3, 4.1) -- cycle;
+   \draw [black, fill={rgb,255:red,235; green,0; blue,255 }] (2.8, 4.6) -- (1.7999999999999998, 4.6) -- (2.3, 4.1) -- cycle;
+   \draw [black, fill={rgb,255:red,0; green,148; blue,255 }] (1.7999999999999998, 4.6) -- (1.7999999999999998, 3.5999999999999996) -- (2.3, 4.1) -- cycle;
+   \draw [black, fill={rgb,255:red,235; green,0; blue,255 }] (1.7999999999999998, 3.5999999999999996) -- (2.8, 3.5999999999999996) -- (2.3, 4.1) -- cycle;
+   \draw [black, fill={rgb,255:red,235; green,0; blue,255 }] (1.6, 0.0) -- (1.6, 1.0) -- (1.1, 0.5) -- cycle;
+   \draw [black, fill={rgb,255:red,235; green,0; blue,255 }] (1.6, 1.0) -- (0.6000000000000001, 1.0) -- (1.1, 0.5) -- cycle;
+   \draw [black, fill={rgb,255:red,255; green,107; blue,0 }] (0.6000000000000001, 1.0) -- (0.6000000000000001, 0.0) -- (1.1, 0.5) -- cycle;
+   \draw [black, fill={rgb,255:red,0; green,148; blue,255 }] (0.6000000000000001, 0.0) -- (1.6, 0.0) -- (1.1, 0.5) -- cycle;
+   \draw [black, fill={rgb,255:red,255; green,107; blue,0 }] (1.6, 1.2) -- (1.6, 2.2) -- (1.1, 1.7) -- cycle;
+   \draw [black, fill={rgb,255:red,255; green,107; blue,0 }] (1.6, 2.2) -- (0.6000000000000001, 2.2) -- (1.1, 1.7) -- cycle;
+   \draw [black, fill={rgb,255:red,255; green,107; blue,0 }] (0.6000000000000001, 2.2) -- (0.6000000000000001, 1.2) -- (1.1, 1.7) -- cycle;
+   \draw [black, fill={rgb,255:red,20; green,255; blue,0 }] (0.6000000000000001, 1.2) -- (1.6, 1.2) -- (1.1, 1.7) -- cycle;
+   \draw [black, fill={rgb,255:red,0; green,148; blue,255 }] (1.6, 2.4) -- (1.6, 3.4) -- (1.1, 2.9) -- cycle;
+   \draw [black, fill={rgb,255:red,0; green,148; blue,255 }] (1.6, 3.4) -- (0.6000000000000001, 3.4) -- (1.1, 2.9) -- cycle;
+   \draw [black, fill={rgb,255:red,235; green,0; blue,255 }] (0.6000000000000001, 3.4) -- (0.6000000000000001, 2.4) -- (1.1, 2.9) -- cycle;
+   \draw [black, fill={rgb,255:red,255; green,107; blue,0 }] (0.6000000000000001, 2.4) -- (1.6, 2.4) -- (1.1, 2.9) -- cycle;
+   \draw [black, fill={rgb,255:red,0; green,148; blue,255 }] (1.6, 3.5999999999999996) -- (1.6, 4.6) -- (1.1, 4.1) -- cycle;
+   \draw [black, fill={rgb,255:red,235; green,0; blue,255 }] (1.6, 4.6) -- (0.6000000000000001, 4.6) -- (1.1, 4.1) -- cycle;
+   \draw [black, fill={rgb,255:red,255; green,107; blue,0 }] (0.6000000000000001, 4.6) -- (0.6000000000000001, 3.5999999999999996) -- (1.1, 4.1) -- cycle;
+   \draw [black, fill={rgb,255:red,235; green,0; blue,255 }] (0.6000000000000001, 3.5999999999999996) -- (1.6, 3.5999999999999996) -- (1.1, 4.1) -- cycle;
+   \draw [black, fill={rgb,255:red,20; green,255; blue,0 }] (0.40000000000000036, 0.0) -- (0.40000000000000036, 1.0) -- (-0.09999999999999964, 0.5) -- cycle;
+   \draw [black, fill={rgb,255:red,235; green,0; blue,255 }] (0.40000000000000036, 1.0) -- (-0.5999999999999996, 1.0) -- (-0.09999999999999964, 0.5) -- cycle;
+   \draw [black, fill={rgb,255:red,255; green,107; blue,0 }] (-0.5999999999999996, 1.0) -- (-0.5999999999999996, 0.0) -- (-0.09999999999999964, 0.5) -- cycle;
+   \draw [black, fill={rgb,255:red,0; green,148; blue,255 }] (-0.5999999999999996, 0.0) -- (0.40000000000000036, 0.0) -- (-0.09999999999999964, 0.5) -- cycle;
+   \draw [black, fill={rgb,255:red,255; green,107; blue,0 }] (0.40000000000000036, 1.2) -- (0.40000000000000036, 2.2) -- (-0.09999999999999964, 1.7) -- cycle;
+   \draw [black, fill={rgb,255:red,0; green,148; blue,255 }] (0.40000000000000036, 2.2) -- (-0.5999999999999996, 2.2) -- (-0.09999999999999964, 1.7) -- cycle;
+   \draw [black, fill={rgb,255:red,235; green,0; blue,255 }] (-0.5999999999999996, 2.2) -- (-0.5999999999999996, 1.2) -- (-0.09999999999999964, 1.7) -- cycle;
+   \draw [black, fill={rgb,255:red,235; green,0; blue,255 }] (-0.5999999999999996, 1.2) -- (0.40000000000000036, 1.2) -- (-0.09999999999999964, 1.7) -- cycle;
+   \draw [black, fill={rgb,255:red,235; green,0; blue,255 }] (0.40000000000000036, 2.4) -- (0.40000000000000036, 3.4) -- (-0.09999999999999964, 2.9) -- cycle;
+   \draw [black, fill={rgb,255:red,0; green,148; blue,255 }] (0.40000000000000036, 3.4) -- (-0.5999999999999996, 3.4) -- (-0.09999999999999964, 2.9) -- cycle;
+   \draw [black, fill={rgb,255:red,235; green,0; blue,255 }] (-0.5999999999999996, 3.4) -- (-0.5999999999999996, 2.4) -- (-0.09999999999999964, 2.9) -- cycle;
+   \draw [black, fill={rgb,255:red,235; green,0; blue,255 }] (-0.5999999999999996, 2.4) -- (0.40000000000000036, 2.4) -- (-0.09999999999999964, 2.9) -- cycle;
+   \draw [black, fill={rgb,255:red,0; green,148; blue,255 }] (0.40000000000000036, 3.5999999999999996) -- (0.40000000000000036, 4.6) -- (-0.09999999999999964, 4.1) -- cycle;
+   \draw [black, fill={rgb,255:red,235; green,0; blue,255 }] (0.40000000000000036, 4.6) -- (-0.5999999999999996, 4.6) -- (-0.09999999999999964, 4.1) -- cycle;
+   \draw [black, fill={rgb,255:red,235; green,0; blue,255 }] (-0.5999999999999996, 4.6) -- (-0.5999999999999996, 3.5999999999999996) -- (-0.09999999999999964, 4.1) -- cycle;
+   \draw [black, fill={rgb,255:red,0; green,148; blue,255 }] (-0.5999999999999996, 3.5999999999999996) -- (0.40000000000000036, 3.5999999999999996) -- (-0.09999999999999964, 4.1) -- cycle;
+\end{tikzpicture}
+\pause
+&
+\begin{tikzpicture}[line cap=round,line join=round,>=triangle 45,x=0.8cm,y=0.8cm]
+    \clip (0, 0) rectangle (2, 4.6);
+    \draw [->,black,line width=2pt] (0, 2.3) -- (2, 2.3);
+\end{tikzpicture}
+&
+\begin{tikzpicture}[line cap=round,line join=round,>=triangle 45,x=0.8cm,y=0.8cm]
+  \clip (0, -0.3) rectangle (4, 4.3);
+   \draw [black, fill={rgb,255:red,20; green,255; blue,0 }] (4, 0) -- (4, 1) -- (3.5, 0.5) -- cycle;
+   \draw [black, fill={rgb,255:red,235; green,0; blue,255 }] (4, 1) -- (3, 1) -- (3.5, 0.5) -- cycle;
+   \draw [black, fill={rgb,255:red,255; green,107; blue,0 }] (3, 1) -- (3, 0) -- (3.5, 0.5) -- cycle;
+   \draw [black, fill={rgb,255:red,0; green,148; blue,255 }] (3, 0) -- (4, 0) -- (3.5, 0.5) -- cycle;
+   \draw [black, fill={rgb,255:red,255; green,107; blue,0 }] (4, 1) -- (4, 2) -- (3.5, 1.5) -- cycle;
+   \draw [black, fill={rgb,255:red,255; green,107; blue,0 }] (4, 2) -- (3, 2) -- (3.5, 1.5) -- cycle;
+   \draw [black, fill={rgb,255:red,20; green,255; blue,0 }] (3, 2) -- (3, 1) -- (3.5, 1.5) -- cycle;
+   \draw [black, fill={rgb,255:red,235; green,0; blue,255 }] (3, 1) -- (4, 1) -- (3.5, 1.5) -- cycle;
+   \draw [black, fill={rgb,255:red,235; green,0; blue,255 }] (4, 2) -- (4, 3) -- (3.5, 2.5) -- cycle;
+   \draw [black, fill={rgb,255:red,235; green,0; blue,255 }] (4, 3) -- (3, 3) -- (3.5, 2.5) -- cycle;
+   \draw [black, fill={rgb,255:red,235; green,0; blue,255 }] (3, 3) -- (3, 2) -- (3.5, 2.5) -- cycle;
+   \draw [black, fill={rgb,255:red,255; green,107; blue,0 }] (3, 2) -- (4, 2) -- (3.5, 2.5) -- cycle;
+   \draw [black, fill={rgb,255:red,0; green,148; blue,255 }] (4, 3) -- (4, 4) -- (3.5, 3.5) -- cycle;
+   \draw [black, fill={rgb,255:red,235; green,0; blue,255 }] (4, 4) -- (3, 4) -- (3.5, 3.5) -- cycle;
+   \draw [black, fill={rgb,255:red,255; green,107; blue,0 }] (3, 4) -- (3, 3) -- (3.5, 3.5) -- cycle;
+   \draw [black, fill={rgb,255:red,235; green,0; blue,255 }] (3, 3) -- (4, 3) -- (3.5, 3.5) -- cycle;
+   \draw [black, fill={rgb,255:red,255; green,107; blue,0 }] (3, 0) -- (3, 1) -- (2.5, 0.5) -- cycle;
+   \draw [black, fill={rgb,255:red,235; green,0; blue,255 }] (3, 1) -- (2, 1) -- (2.5, 0.5) -- cycle;
+   \draw [black, fill={rgb,255:red,235; green,0; blue,255 }] (2, 1) -- (2, 0) -- (2.5, 0.5) -- cycle;
+   \draw [black, fill={rgb,255:red,0; green,148; blue,255 }] (2, 0) -- (3, 0) -- (2.5, 0.5) -- cycle;
+   \draw [black, fill={rgb,255:red,20; green,255; blue,0 }] (3, 1) -- (3, 2) -- (2.5, 1.5) -- cycle;
+   \draw [black, fill={rgb,255:red,235; green,0; blue,255 }] (3, 2) -- (2, 2) -- (2.5, 1.5) -- cycle;
+   \draw [black, fill={rgb,255:red,0; green,148; blue,255 }] (2, 2) -- (2, 1) -- (2.5, 1.5) -- cycle;
+   \draw [black, fill={rgb,255:red,235; green,0; blue,255 }] (2, 1) -- (3, 1) -- (2.5, 1.5) -- cycle;
+   \draw [black, fill={rgb,255:red,235; green,0; blue,255 }] (3, 2) -- (3, 3) -- (2.5, 2.5) -- cycle;
+   \draw [black, fill={rgb,255:red,20; green,255; blue,0 }] (3, 3) -- (2, 3) -- (2.5, 2.5) -- cycle;
+   \draw [black, fill={rgb,255:red,0; green,148; blue,255 }] (2, 3) -- (2, 2) -- (2.5, 2.5) -- cycle;
+   \draw [black, fill={rgb,255:red,235; green,0; blue,255 }] (2, 2) -- (3, 2) -- (2.5, 2.5) -- cycle;
+   \draw [black, fill={rgb,255:red,255; green,107; blue,0 }] (3, 3) -- (3, 4) -- (2.5, 3.5) -- cycle;
+   \draw [black, fill={rgb,255:red,255; green,107; blue,0 }] (3, 4) -- (2, 4) -- (2.5, 3.5) -- cycle;
+   \draw [black, fill={rgb,255:red,255; green,107; blue,0 }] (2, 4) -- (2, 3) -- (2.5, 3.5) -- cycle;
+   \draw [black, fill={rgb,255:red,20; green,255; blue,0 }] (2, 3) -- (3, 3) -- (2.5, 3.5) -- cycle;
+   \draw [black, fill={rgb,255:red,235; green,0; blue,255 }] (2, 0) -- (2, 1) -- (1.5, 0.5) -- cycle;
+   \draw [black, fill={rgb,255:red,20; green,255; blue,0 }] (2, 1) -- (1, 1) -- (1.5, 0.5) -- cycle;
+   \draw [black, fill={rgb,255:red,255; green,107; blue,0 }] (1, 1) -- (1, 0) -- (1.5, 0.5) -- cycle;
+   \draw [black, fill={rgb,255:red,20; green,255; blue,0 }] (1, 0) -- (2, 0) -- (1.5, 0.5) -- cycle;
+   \draw [black, fill={rgb,255:red,0; green,148; blue,255 }] (2, 1) -- (2, 2) -- (1.5, 1.5) -- cycle;
+   \draw [black, fill={rgb,255:red,0; green,148; blue,255 }] (2, 2) -- (1, 2) -- (1.5, 1.5) -- cycle;
+   \draw [black, fill={rgb,255:red,0; green,148; blue,255 }] (1, 2) -- (1, 1) -- (1.5, 1.5) -- cycle;
+   \draw [black, fill={rgb,255:red,20; green,255; blue,0 }] (1, 1) -- (2, 1) -- (1.5, 1.5) -- cycle;
+   \draw [black, fill={rgb,255:red,0; green,148; blue,255 }] (2, 2) -- (2, 3) -- (1.5, 2.5) -- cycle;
+   \draw [black, fill={rgb,255:red,235; green,0; blue,255 }] (2, 3) -- (1, 3) -- (1.5, 2.5) -- cycle;
+   \draw [black, fill={rgb,255:red,235; green,0; blue,255 }] (1, 3) -- (1, 2) -- (1.5, 2.5) -- cycle;
+   \draw [black, fill={rgb,255:red,0; green,148; blue,255 }] (1, 2) -- (2, 2) -- (1.5, 2.5) -- cycle;
+   \draw [black, fill={rgb,255:red,255; green,107; blue,0 }] (2, 3) -- (2, 4) -- (1.5, 3.5) -- cycle;
+   \draw [black, fill={rgb,255:red,0; green,148; blue,255 }] (2, 4) -- (1, 4) -- (1.5, 3.5) -- cycle;
+   \draw [black, fill={rgb,255:red,235; green,0; blue,255 }] (1, 4) -- (1, 3) -- (1.5, 3.5) -- cycle;
+   \draw [black, fill={rgb,255:red,235; green,0; blue,255 }] (1, 3) -- (2, 3) -- (1.5, 3.5) -- cycle;
+   \draw [black, fill={rgb,255:red,255; green,107; blue,0 }] (1, 0) -- (1, 1) -- (0.5, 0.5) -- cycle;
+   \draw [black, fill={rgb,255:red,255; green,107; blue,0 }] (1, 1) -- (0, 1) -- (0.5, 0.5) -- cycle;
+   \draw [black, fill={rgb,255:red,0; green,148; blue,255 }] (0, 1) -- (0, 0) -- (0.5, 0.5) -- cycle;
+   \draw [black, fill={rgb,255:red,235; green,0; blue,255 }] (0, 0) -- (1, 0) -- (0.5, 0.5) -- cycle;
+   \draw [black, fill={rgb,255:red,0; green,148; blue,255 }] (1, 1) -- (1, 2) -- (0.5, 1.5) -- cycle;
+   \draw [black, fill={rgb,255:red,0; green,148; blue,255 }] (1, 2) -- (0, 2) -- (0.5, 1.5) -- cycle;
+   \draw [black, fill={rgb,255:red,235; green,0; blue,255 }] (0, 2) -- (0, 1) -- (0.5, 1.5) -- cycle;
+   \draw [black, fill={rgb,255:red,255; green,107; blue,0 }] (0, 1) -- (1, 1) -- (0.5, 1.5) -- cycle;
+   \draw [black, fill={rgb,255:red,235; green,0; blue,255 }] (1, 2) -- (1, 3) -- (0.5, 2.5) -- cycle;
+   \draw [black, fill={rgb,255:red,235; green,0; blue,255 }] (1, 3) -- (0, 3) -- (0.5, 2.5) -- cycle;
+   \draw [black, fill={rgb,255:red,255; green,107; blue,0 }] (0, 3) -- (0, 2) -- (0.5, 2.5) -- cycle;
+   \draw [black, fill={rgb,255:red,0; green,148; blue,255 }] (0, 2) -- (1, 2) -- (0.5, 2.5) -- cycle;
+   \draw [black, fill={rgb,255:red,235; green,0; blue,255 }] (1, 3) -- (1, 4) -- (0.5, 3.5) -- cycle;
+   \draw [black, fill={rgb,255:red,0; green,148; blue,255 }] (1, 4) -- (0, 4) -- (0.5, 3.5) -- cycle;
+   \draw [black, fill={rgb,255:red,235; green,0; blue,255 }] (0, 4) -- (0, 3) -- (0.5, 3.5) -- cycle;
+   \draw [black, fill={rgb,255:red,235; green,0; blue,255 }] (0, 3) -- (1, 3) -- (0.5, 3.5) -- cycle;
+\end{tikzpicture}
+\end{tabular}
+
+\caption{Exemple de grille $4 \times 4$}
+\end{center}
+\end{figure}
+
+\end{frame}
+
+\section{Description}
+
+\subsection{Variables}
+
+\begin{frame}{Variables}
+\begin{itemize}
+    \item $h$ est la hauteur de la grille, $l$ sa largeur
+    \item On note $n = h \times l$ le nombre total de tuiles
+    \item La variable $X_{t, \, i, \, j}$ vaut $\top$ si et seulement si la tuile $t$ est posée en position $(i, \, j)$.
+\end{itemize}
+\end{frame}
+
+\subsection{Conditions}
+
+\begin{frame}{Conditions}
+\begin{itemize}
+    \item 3 conditions :
+    \vspace{0,5 cm}
+    \begin{itemize}
+        \item Deux tuiles ne peuvent se superposer
+        \item Chaque tuile est utilisée une fois
+        \item Deux tuiles adjacentes doivent posséder la même couleur
+    \end{itemize}
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Clauses}
+\begin{itemize}
+\item Pas de superposition -- au plus une tuile :
+
+$$ \bigwedge_{i = 1}^{h} \bigwedge_{j = 1}^{l} \bigwedge_{t_1 = 1}^{n} \bigwedge_{t_2 = 1}^{t_1-1} \left( \lnot X_{t_1, \, i, \, j} \lor \lnot X_{t_2, \, i, \, {j}} \right) $$
+
+ nombre de clauses : $n*\dbinom{n}{2} $
+
+\item Toutes les tuiles sont utilisées :
+
+$$ \bigwedge_{t = 1}^{n} \bigvee_{i = 1}^{h} \bigvee_{j = 1}^{l}  X_{t, \, i, \, j} $$
+
+ nombre de clauses : $n$ 
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}{Clauses}
+    \begin{itemize}
+         \item Cases remplies -- au moins une tuile :
+        $$\bigwedge_{i = 1}^{h} \bigwedge_{j = 1}^{l} \bigvee_{t_1 = 1}^{n}  X_{t, \, i, \, j}$$
+         nombre de clauses : $n$ 
+   \end{itemize}
+\end{frame}
+
+\begin{frame}{Clauses}
+    \begin{itemize}
+        \item Contraintes d'adjacence :
+        
+        $$ \underbrace{\left( \bigwedge_{i = 1}^{h} \bigwedge_{j = 1}^{l - 1} \bigwedge_{t_1 = 1}^{n} \bigwedge_{t_2 \in d(t_1)} \left( \lnot X_{t_1, \, i, \, j} \lor \lnot X_{t_2, \, i, \, {j+1}} \right) \right)}_{\text{Adjacence horizontale}}$$
+        $$\land \underbrace{\left( \bigwedge_{i = 1}^{h - 1} \bigwedge_{j = 1}^{l} \bigwedge_{t_1 = 1}^{n} \bigwedge_{t_2 \in b(t_1)} \left( \lnot X_{t_1, \, i, \, j} \lor \lnot X_{t_2, \, {i+1}, \, j} \right) \right)}_{\text{Adjacence verticale}} $$
+    \end{itemize}
+\end{frame}
+
+\section{Programme}
+
+
+
+
+%\iffalse
+
+
+
+
+\subsection{Générateur}
+
+\begin{frame}{Générateur}
+\begin{itemize}
+    \item Fonction qui permet de générer une grille de tuille satisfiable en fonction de paramètres donnés :
+    \vspace{0,5 cm}
+    \begin{itemize}
+        \item largeur 
+        \item hauteur 
+        \item nombre de couleurs.
+    \end{itemize}
+\end{itemize}
+\end{frame}
+
+\subsection{Main}
+
+\begin{frame}{Main}
+\begin{tikzpicture}
+  [node distance=.8cm,
+  start chain=going below,]
+     \node[punktchain, join] (intro) {Générateur};
+     \node[punktchain, join] (probf)      {Main};
+      \node (asym) [punktchain ]  {Appel du SAT Solveur};
+      \begin{scope}[start branch=venstre,
+        %We need to redefine the join-style to have the -> turn out right
+        every join/.style={->, thick, shorten <=1pt}, ]
+        \node[punktchain, on chain=going left, join=by {<-}]
+            (risiko) {Prise en compte des contraintes};
+      \end{scope}
+    \begin{scope}[start branch=hoejre,  every join/.style={->, thick, shorten <=1pt},]
+      \node (finans) [punktchain, on chain=going right, join=by {->}] {Solution retranscrite};
+    \end{scope}
+  % Now, let us add some braches. 
+  %% No. 1
+  \draw[tuborg] let
+    \p1=(risiko.west), \p2=(finans.east) in
+    ($(\x1,\y1+2.5em)$) -- ($(\x2,\y2+2.5em)$) node[above, midway]  {};
+  \end{tikzpicture}
+\end{frame}
+
+\begin{frame}{Remarque}
+\begin{itemize}
+    \item Optimisation de notre algorithme: ~\\ \vspace{0,5 cm}
+    Soit $n$ le nombre de variables. Passage de $n^{2}$ à $n*\log_2(n)$
+    ~\\ \vspace{0,5 cm}
+    \fbox{
+        \begin{minipage}[]{9cm}
+        Diminution des variables + augmentation des clauses\\
+        $\rightarrow{}$ pas de meilleure efficacité.\\
+        \end{minipage}
+        }
+\end{itemize}
+\end{frame}
+
+\subsection{Performances}
+\begin{frame}{Performances - Vive l'exponetielle}
+\begin{center}
+\includesvg[width=0.7\linewidth]{size2time_3colors.svg}
+\end{center}{}
+\end{frame}
+
+\begin{frame}{Performances - Taille}
+\begin{center}
+\includesvg[width=\linewidth]{5byx.svg}
+\end{center}{}
+\end{frame}
+
+\begin{frame}{Performances - Couleurs}
+\begin{center}
+\includesvg[width=\linewidth]{colors.svg}
+\end{center}{}
+\end{frame}
+
+\subsection{Hexagones}
+
+\begin{frame}{Hexagones}
+
+    \begin{figure}[h!]
+    \begin{center}
+    \begin{tikzpicture}[line cap=round,line join=round,>=triangle 45,x=0.07mm,y=0.07mm]
+    \clip (0, 0) rectangle (700, 700);
+       \draw [black, fill={rgb,255:red,255; green,107; blue,0 }] (100.0, 217.12812921102034) -- (170.0, 217.12812921102034) -- (135.0, 156.50635094610965) -- cycle;
+   \draw [black, fill={rgb,255:red,255; green,107; blue,0 }] (100.0, 217.12812921102034) -- (135.0, 156.50635094610965) -- (65.0, 156.50635094610965) -- cycle;
+   \draw [black, fill={rgb,255:red,212; green,255; blue,0 }] (100.0, 217.12812921102034) -- (65.0, 156.50635094610965) -- (30.0, 217.12812921102034) -- cycle;
+   \draw [black, fill={rgb,255:red,255; green,0; blue,84 }] (100.0, 217.12812921102034) -- (30.0, 217.12812921102034) -- (65.0, 277.749907475931) -- cycle;
+   \draw [black, fill={rgb,255:red,255; green,0; blue,84 }] (100.0, 217.12812921102034) -- (65.0, 277.749907475931) -- (135.0, 277.749907475931) -- cycle;
+   \draw [black, fill={rgb,255:red,255; green,0; blue,84 }] (100.0, 217.12812921102034) -- (135.0, 277.749907475931) -- (170.0, 217.12812921102034) -- cycle;
+   \draw [black, fill={rgb,255:red,212; green,255; blue,0 }] (100.0, 355.69219381653056) -- (170.0, 355.69219381653056) -- (135.0, 295.0704155516199) -- cycle;
+   \draw [black, fill={rgb,255:red,0; green,255; blue,171 }] (100.0, 355.69219381653056) -- (135.0, 295.0704155516199) -- (65.0, 295.0704155516199) -- cycle;
+   \draw [black, fill={rgb,255:red,235; green,0; blue,255 }] (100.0, 355.69219381653056) -- (65.0, 295.0704155516199) -- (30.0, 355.69219381653056) -- cycle;
+   \draw [black, fill={rgb,255:red,212; green,255; blue,0 }] (100.0, 355.69219381653056) -- (30.0, 355.69219381653056) -- (65.0, 416.31397208144125) -- cycle;
+   \draw [black, fill={rgb,255:red,255; green,107; blue,0 }] (100.0, 355.69219381653056) -- (65.0, 416.31397208144125) -- (135.0, 416.31397208144125) -- cycle;
+   \draw [black, fill={rgb,255:red,212; green,255; blue,0 }] (100.0, 355.69219381653056) -- (135.0, 416.31397208144125) -- (170.0, 355.69219381653056) -- cycle;
+   \draw [black, fill={rgb,255:red,212; green,255; blue,0 }] (100.0, 494.2562584220407) -- (170.0, 494.2562584220407) -- (135.0, 433.63448015713) -- cycle;
+   \draw [black, fill={rgb,255:red,235; green,0; blue,255 }] (100.0, 494.2562584220407) -- (135.0, 433.63448015713) -- (65.0, 433.63448015713) -- cycle;
+   \draw [black, fill={rgb,255:red,255; green,107; blue,0 }] (100.0, 494.2562584220407) -- (65.0, 433.63448015713) -- (30.0, 494.2562584220407) -- cycle;
+   \draw [black, fill={rgb,255:red,0; green,255; blue,171 }] (100.0, 494.2562584220407) -- (30.0, 494.2562584220407) -- (65.0, 554.8780366869514) -- cycle;
+   \draw [black, fill={rgb,255:red,212; green,255; blue,0 }] (100.0, 494.2562584220407) -- (65.0, 554.8780366869514) -- (135.0, 554.8780366869514) -- cycle;
+   \draw [black, fill={rgb,255:red,0; green,255; blue,171 }] (100.0, 494.2562584220407) -- (135.0, 554.8780366869514) -- (170.0, 494.2562584220407) -- cycle;
+   \draw [black, fill={rgb,255:red,0; green,255; blue,171 }] (220.0, 147.84609690826528) -- (290.0, 147.84609690826528) -- (255.0, 87.22431864335458) -- cycle;
+   \draw [black, fill={rgb,255:red,20; green,255; blue,0 }] (220.0, 147.84609690826528) -- (255.0, 87.22431864335458) -- (185.0, 87.22431864335458) -- cycle;
+   \draw [black, fill={rgb,255:red,255; green,0; blue,84 }] (220.0, 147.84609690826528) -- (185.0, 87.22431864335458) -- (150.0, 147.84609690826528) -- cycle;
+   \draw [black, fill={rgb,255:red,235; green,0; blue,255 }] (220.0, 147.84609690826528) -- (150.0, 147.84609690826528) -- (185.0, 208.46787517317597) -- cycle;
+   \draw [black, fill={rgb,255:red,20; green,255; blue,0 }] (220.0, 147.84609690826528) -- (185.0, 208.46787517317597) -- (255.0, 208.46787517317597) -- cycle;
+   \draw [black, fill={rgb,255:red,212; green,255; blue,0 }] (220.0, 147.84609690826528) -- (255.0, 208.46787517317597) -- (290.0, 147.84609690826528) -- cycle;
+   \draw [black, fill={rgb,255:red,255; green,0; blue,84 }] (220.0, 286.4101615137754) -- (290.0, 286.4101615137754) -- (255.0, 225.7883832488647) -- cycle;
+   \draw [black, fill={rgb,255:red,20; green,255; blue,0 }] (220.0, 286.4101615137754) -- (255.0, 225.7883832488647) -- (185.0, 225.7883832488647) -- cycle;
+   \draw [black, fill={rgb,255:red,20; green,255; blue,0 }] (220.0, 286.4101615137754) -- (185.0, 225.7883832488647) -- (150.0, 286.4101615137754) -- cycle;
+   \draw [black, fill={rgb,255:red,212; green,255; blue,0 }] (220.0, 286.4101615137754) -- (150.0, 286.4101615137754) -- (185.0, 347.0319397786861) -- cycle;
+   \draw [black, fill={rgb,255:red,212; green,255; blue,0 }] (220.0, 286.4101615137754) -- (185.0, 347.0319397786861) -- (255.0, 347.0319397786861) -- cycle;
+   \draw [black, fill={rgb,255:red,212; green,255; blue,0 }] (220.0, 286.4101615137754) -- (255.0, 347.0319397786861) -- (290.0, 286.4101615137754) -- cycle;
+   \draw [black, fill={rgb,255:red,235; green,0; blue,255 }] (220.0, 424.9742261192856) -- (290.0, 424.9742261192856) -- (255.0, 364.35244785437493) -- cycle;
+   \draw [black, fill={rgb,255:red,20; green,255; blue,0 }] (220.0, 424.9742261192856) -- (255.0, 364.35244785437493) -- (185.0, 364.35244785437493) -- cycle;
+   \draw [black, fill={rgb,255:red,255; green,107; blue,0 }] (220.0, 424.9742261192856) -- (185.0, 364.35244785437493) -- (150.0, 424.9742261192856) -- cycle;
+   \draw [black, fill={rgb,255:red,255; green,107; blue,0 }] (220.0, 424.9742261192856) -- (150.0, 424.9742261192856) -- (185.0, 485.5960043841963) -- cycle;
+   \draw [black, fill={rgb,255:red,255; green,0; blue,84 }] (220.0, 424.9742261192856) -- (185.0, 485.5960043841963) -- (255.0, 485.5960043841963) -- cycle;
+   \draw [black, fill={rgb,255:red,235; green,0; blue,255 }] (220.0, 424.9742261192856) -- (255.0, 485.5960043841963) -- (290.0, 424.9742261192856) -- cycle;
+   \draw [black, fill={rgb,255:red,255; green,107; blue,0 }] (220.0, 563.5382907247957) -- (290.0, 563.5382907247957) -- (255.0, 502.91651245988504) -- cycle;
+   \draw [black, fill={rgb,255:red,212; green,255; blue,0 }] (220.0, 563.5382907247957) -- (255.0, 502.91651245988504) -- (185.0, 502.91651245988504) -- cycle;
+   \draw [black, fill={rgb,255:red,212; green,255; blue,0 }] (220.0, 563.5382907247957) -- (185.0, 502.91651245988504) -- (150.0, 563.5382907247957) -- cycle;
+   \draw [black, fill={rgb,255:red,20; green,255; blue,0 }] (220.0, 563.5382907247957) -- (150.0, 563.5382907247957) -- (185.0, 624.1600689897065) -- cycle;
+   \draw [black, fill={rgb,255:red,255; green,107; blue,0 }] (220.0, 563.5382907247957) -- (185.0, 624.1600689897065) -- (255.0, 624.1600689897065) -- cycle;
+   \draw [black, fill={rgb,255:red,235; green,0; blue,255 }] (220.0, 563.5382907247957) -- (255.0, 624.1600689897065) -- (290.0, 563.5382907247957) -- cycle;
+   \draw [black, fill={rgb,255:red,212; green,255; blue,0 }] (340.0, 78.56406460551017) -- (410.0, 78.56406460551017) -- (375.0, 17.942286340599466) -- cycle;
+   \draw [black, fill={rgb,255:red,212; green,255; blue,0 }] (340.0, 78.56406460551017) -- (375.0, 17.942286340599466) -- (305.0, 17.942286340599466) -- cycle;
+   \draw [black, fill={rgb,255:red,255; green,107; blue,0 }] (340.0, 78.56406460551017) -- (305.0, 17.942286340599466) -- (270.0, 78.56406460551017) -- cycle;
+   \draw [black, fill={rgb,255:red,20; green,255; blue,0 }] (340.0, 78.56406460551017) -- (270.0, 78.56406460551017) -- (305.0, 139.18584287042086) -- cycle;
+   \draw [black, fill={rgb,255:red,235; green,0; blue,255 }] (340.0, 78.56406460551017) -- (305.0, 139.18584287042086) -- (375.0, 139.18584287042086) -- cycle;
+   \draw [black, fill={rgb,255:red,255; green,107; blue,0 }] (340.0, 78.56406460551017) -- (375.0, 139.18584287042086) -- (410.0, 78.56406460551017) -- cycle;
+   \draw [black, fill={rgb,255:red,20; green,255; blue,0 }] (340.0, 217.12812921102034) -- (410.0, 217.12812921102034) -- (375.0, 156.50635094610965) -- cycle;
+   \draw [black, fill={rgb,255:red,255; green,107; blue,0 }] (340.0, 217.12812921102034) -- (375.0, 156.50635094610965) -- (305.0, 156.50635094610965) -- cycle;
+   \draw [black, fill={rgb,255:red,20; green,255; blue,0 }] (340.0, 217.12812921102034) -- (305.0, 156.50635094610965) -- (270.0, 217.12812921102034) -- cycle;
+   \draw [black, fill={rgb,255:red,255; green,0; blue,84 }] (340.0, 217.12812921102034) -- (270.0, 217.12812921102034) -- (305.0, 277.749907475931) -- cycle;
+   \draw [black, fill={rgb,255:red,255; green,0; blue,84 }] (340.0, 217.12812921102034) -- (305.0, 277.749907475931) -- (375.0, 277.749907475931) -- cycle;
+   \draw [black, fill={rgb,255:red,235; green,0; blue,255 }] (340.0, 217.12812921102034) -- (375.0, 277.749907475931) -- (410.0, 217.12812921102034) -- cycle;
+   \draw [black, fill={rgb,255:red,235; green,0; blue,255 }] (340.0, 355.69219381653056) -- (410.0, 355.69219381653056) -- (375.0, 295.0704155516199) -- cycle;
+   \draw [black, fill={rgb,255:red,255; green,0; blue,84 }] (340.0, 355.69219381653056) -- (375.0, 295.0704155516199) -- (305.0, 295.0704155516199) -- cycle;
+   \draw [black, fill={rgb,255:red,212; green,255; blue,0 }] (340.0, 355.69219381653056) -- (305.0, 295.0704155516199) -- (270.0, 355.69219381653056) -- cycle;
+   \draw [black, fill={rgb,255:red,255; green,107; blue,0 }] (340.0, 355.69219381653056) -- (270.0, 355.69219381653056) -- (305.0, 416.31397208144125) -- cycle;
+   \draw [black, fill={rgb,255:red,255; green,107; blue,0 }] (340.0, 355.69219381653056) -- (305.0, 416.31397208144125) -- (375.0, 416.31397208144125) -- cycle;
+   \draw [black, fill={rgb,255:red,255; green,107; blue,0 }] (340.0, 355.69219381653056) -- (375.0, 416.31397208144125) -- (410.0, 355.69219381653056) -- cycle;
+   \draw [black, fill={rgb,255:red,235; green,0; blue,255 }] (340.0, 494.2562584220407) -- (410.0, 494.2562584220407) -- (375.0, 433.63448015713) -- cycle;
+   \draw [black, fill={rgb,255:red,20; green,255; blue,0 }] (340.0, 494.2562584220407) -- (375.0, 433.63448015713) -- (305.0, 433.63448015713) -- cycle;
+   \draw [black, fill={rgb,255:red,235; green,0; blue,255 }] (340.0, 494.2562584220407) -- (305.0, 433.63448015713) -- (270.0, 494.2562584220407) -- cycle;
+   \draw [black, fill={rgb,255:red,255; green,107; blue,0 }] (340.0, 494.2562584220407) -- (270.0, 494.2562584220407) -- (305.0, 554.8780366869514) -- cycle;
+   \draw [black, fill={rgb,255:red,255; green,107; blue,0 }] (340.0, 494.2562584220407) -- (305.0, 554.8780366869514) -- (375.0, 554.8780366869514) -- cycle;
+   \draw [black, fill={rgb,255:red,235; green,0; blue,255 }] (340.0, 494.2562584220407) -- (375.0, 554.8780366869514) -- (410.0, 494.2562584220407) -- cycle;
+   \draw [black, fill={rgb,255:red,255; green,107; blue,0 }] (340.0, 632.8203230275508) -- (410.0, 632.8203230275508) -- (375.0, 572.19854476264) -- cycle;
+   \draw [black, fill={rgb,255:red,255; green,0; blue,84 }] (340.0, 632.8203230275508) -- (375.0, 572.19854476264) -- (305.0, 572.19854476264) -- cycle;
+   \draw [black, fill={rgb,255:red,255; green,107; blue,0 }] (340.0, 632.8203230275508) -- (305.0, 572.19854476264) -- (270.0, 632.8203230275508) -- cycle;
+   \draw [black, fill={rgb,255:red,255; green,0; blue,84 }] (340.0, 632.8203230275508) -- (270.0, 632.8203230275508) -- (305.0, 693.4421012924615) -- cycle;
+   \draw [black, fill={rgb,255:red,212; green,255; blue,0 }] (340.0, 632.8203230275508) -- (305.0, 693.4421012924615) -- (375.0, 693.4421012924615) -- cycle;
+   \draw [black, fill={rgb,255:red,20; green,255; blue,0 }] (340.0, 632.8203230275508) -- (375.0, 693.4421012924615) -- (410.0, 632.8203230275508) -- cycle;
+   \draw [black, fill={rgb,255:red,255; green,107; blue,0 }] (460.0, 147.84609690826528) -- (530.0, 147.84609690826528) -- (495.0, 87.22431864335458) -- cycle;
+   \draw [black, fill={rgb,255:red,212; green,255; blue,0 }] (460.0, 147.84609690826528) -- (495.0, 87.22431864335458) -- (425.0, 87.22431864335458) -- cycle;
+   \draw [black, fill={rgb,255:red,255; green,107; blue,0 }] (460.0, 147.84609690826528) -- (425.0, 87.22431864335458) -- (390.0, 147.84609690826528) -- cycle;
+   \draw [black, fill={rgb,255:red,212; green,255; blue,0 }] (460.0, 147.84609690826528) -- (390.0, 147.84609690826528) -- (425.0, 208.46787517317597) -- cycle;
+   \draw [black, fill={rgb,255:red,0; green,255; blue,171 }] (460.0, 147.84609690826528) -- (425.0, 208.46787517317597) -- (495.0, 208.46787517317597) -- cycle;
+   \draw [black, fill={rgb,255:red,235; green,0; blue,255 }] (460.0, 147.84609690826528) -- (495.0, 208.46787517317597) -- (530.0, 147.84609690826528) -- cycle;
+   \draw [black, fill={rgb,255:red,20; green,255; blue,0 }] (460.0, 286.4101615137754) -- (530.0, 286.4101615137754) -- (495.0, 225.7883832488647) -- cycle;
+   \draw [black, fill={rgb,255:red,255; green,107; blue,0 }] (460.0, 286.4101615137754) -- (495.0, 225.7883832488647) -- (425.0, 225.7883832488647) -- cycle;
+   \draw [black, fill={rgb,255:red,20; green,255; blue,0 }] (460.0, 286.4101615137754) -- (425.0, 225.7883832488647) -- (390.0, 286.4101615137754) -- cycle;
+   \draw [black, fill={rgb,255:red,235; green,0; blue,255 }] (460.0, 286.4101615137754) -- (390.0, 286.4101615137754) -- (425.0, 347.0319397786861) -- cycle;
+   \draw [black, fill={rgb,255:red,235; green,0; blue,255 }] (460.0, 286.4101615137754) -- (425.0, 347.0319397786861) -- (495.0, 347.0319397786861) -- cycle;
+   \draw [black, fill={rgb,255:red,235; green,0; blue,255 }] (460.0, 286.4101615137754) -- (495.0, 347.0319397786861) -- (530.0, 286.4101615137754) -- cycle;
+   \draw [black, fill={rgb,255:red,0; green,255; blue,171 }] (460.0, 424.9742261192856) -- (530.0, 424.9742261192856) -- (495.0, 364.35244785437493) -- cycle;
+   \draw [black, fill={rgb,255:red,255; green,107; blue,0 }] (460.0, 424.9742261192856) -- (495.0, 364.35244785437493) -- (425.0, 364.35244785437493) -- cycle;
+   \draw [black, fill={rgb,255:red,255; green,0; blue,84 }] (460.0, 424.9742261192856) -- (425.0, 364.35244785437493) -- (390.0, 424.9742261192856) -- cycle;
+   \draw [black, fill={rgb,255:red,212; green,255; blue,0 }] (460.0, 424.9742261192856) -- (390.0, 424.9742261192856) -- (425.0, 485.5960043841963) -- cycle;
+   \draw [black, fill={rgb,255:red,20; green,255; blue,0 }] (460.0, 424.9742261192856) -- (425.0, 485.5960043841963) -- (495.0, 485.5960043841963) -- cycle;
+   \draw [black, fill={rgb,255:red,212; green,255; blue,0 }] (460.0, 424.9742261192856) -- (495.0, 485.5960043841963) -- (530.0, 424.9742261192856) -- cycle;
+   \draw [black, fill={rgb,255:red,255; green,0; blue,84 }] (460.0, 563.5382907247958) -- (530.0, 563.5382907247958) -- (495.0, 502.91651245988515) -- cycle;
+   \draw [black, fill={rgb,255:red,20; green,255; blue,0 }] (460.0, 563.5382907247958) -- (495.0, 502.91651245988515) -- (425.0, 502.91651245988515) -- cycle;
+   \draw [black, fill={rgb,255:red,255; green,107; blue,0 }] (460.0, 563.5382907247958) -- (425.0, 502.91651245988515) -- (390.0, 563.5382907247958) -- cycle;
+   \draw [black, fill={rgb,255:red,0; green,255; blue,171 }] (460.0, 563.5382907247958) -- (390.0, 563.5382907247958) -- (425.0, 624.1600689897066) -- cycle;
+   \draw [black, fill={rgb,255:red,0; green,255; blue,171 }] (460.0, 563.5382907247958) -- (425.0, 624.1600689897066) -- (495.0, 624.1600689897066) -- cycle;
+   \draw [black, fill={rgb,255:red,235; green,0; blue,255 }] (460.0, 563.5382907247958) -- (495.0, 624.1600689897066) -- (530.0, 563.5382907247958) -- cycle;
+   \draw [black, fill={rgb,255:red,0; green,255; blue,171 }] (580.0, 217.12812921102034) -- (650.0, 217.12812921102034) -- (615.0, 156.50635094610965) -- cycle;
+   \draw [black, fill={rgb,255:red,235; green,0; blue,255 }] (580.0, 217.12812921102034) -- (615.0, 156.50635094610965) -- (545.0, 156.50635094610965) -- cycle;
+   \draw [black, fill={rgb,255:red,212; green,255; blue,0 }] (580.0, 217.12812921102034) -- (545.0, 156.50635094610965) -- (510.0, 217.12812921102034) -- cycle;
+   \draw [black, fill={rgb,255:red,235; green,0; blue,255 }] (580.0, 217.12812921102034) -- (510.0, 217.12812921102034) -- (545.0, 277.749907475931) -- cycle;
+   \draw [black, fill={rgb,255:red,255; green,0; blue,84 }] (580.0, 217.12812921102034) -- (545.0, 277.749907475931) -- (615.0, 277.749907475931) -- cycle;
+   \draw [black, fill={rgb,255:red,255; green,107; blue,0 }] (580.0, 217.12812921102034) -- (615.0, 277.749907475931) -- (650.0, 217.12812921102034) -- cycle;
+   \draw [black, fill={rgb,255:red,255; green,107; blue,0 }] (580.0, 355.69219381653056) -- (650.0, 355.69219381653056) -- (615.0, 295.0704155516199) -- cycle;
+   \draw [black, fill={rgb,255:red,255; green,107; blue,0 }] (580.0, 355.69219381653056) -- (615.0, 295.0704155516199) -- (545.0, 295.0704155516199) -- cycle;
+   \draw [black, fill={rgb,255:red,235; green,0; blue,255 }] (580.0, 355.69219381653056) -- (545.0, 295.0704155516199) -- (510.0, 355.69219381653056) -- cycle;
+   \draw [black, fill={rgb,255:red,212; green,255; blue,0 }] (580.0, 355.69219381653056) -- (510.0, 355.69219381653056) -- (545.0, 416.31397208144125) -- cycle;
+   \draw [black, fill={rgb,255:red,212; green,255; blue,0 }] (580.0, 355.69219381653056) -- (545.0, 416.31397208144125) -- (615.0, 416.31397208144125) -- cycle;
+   \draw [black, fill={rgb,255:red,235; green,0; blue,255 }] (580.0, 355.69219381653056) -- (615.0, 416.31397208144125) -- (650.0, 355.69219381653056) -- cycle;
+   \draw [black, fill={rgb,255:red,255; green,0; blue,84 }] (580.0, 494.2562584220407) -- (650.0, 494.2562584220407) -- (615.0, 433.63448015713) -- cycle;
+   \draw [black, fill={rgb,255:red,235; green,0; blue,255 }] (580.0, 494.2562584220407) -- (615.0, 433.63448015713) -- (545.0, 433.63448015713) -- cycle;
+   \draw [black, fill={rgb,255:red,235; green,0; blue,255 }] (580.0, 494.2562584220407) -- (545.0, 433.63448015713) -- (510.0, 494.2562584220407) -- cycle;
+   \draw [black, fill={rgb,255:red,20; green,255; blue,0 }] (580.0, 494.2562584220407) -- (510.0, 494.2562584220407) -- (545.0, 554.8780366869514) -- cycle;
+   \draw [black, fill={rgb,255:red,20; green,255; blue,0 }] (580.0, 494.2562584220407) -- (545.0, 554.8780366869514) -- (615.0, 554.8780366869514) -- cycle;
+   \draw [black, fill={rgb,255:red,255; green,107; blue,0 }] (580.0, 494.2562584220407) -- (615.0, 554.8780366869514) -- (650.0, 494.2562584220407) -- cycle;
+   \draw [black, fill={rgb,255:red,0; green,255; blue,171 }] (460.0, 1256.3586137523466) -- (530.0, 1256.3586137523466) -- (495.0, 1195.7368354874359) -- cycle;
+   \draw [black, fill={rgb,255:red,255; green,0; blue,84 }] (460.0, 1256.3586137523466) -- (495.0, 1195.7368354874359) -- (425.0, 1195.7368354874359) -- cycle;
+   \draw [black, fill={rgb,255:red,235; green,0; blue,255 }] (460.0, 1256.3586137523466) -- (425.0, 1195.7368354874359) -- (390.0, 1256.3586137523466) -- cycle;
+   \draw [black, fill={rgb,255:red,0; green,255; blue,171 }] (460.0, 1256.3586137523466) -- (390.0, 1256.3586137523466) -- (425.0, 1316.9803920172574) -- cycle;
+   \draw [black, fill={rgb,255:red,20; green,255; blue,0 }] (460.0, 1256.3586137523466) -- (425.0, 1316.9803920172574) -- (495.0, 1316.9803920172574) -- cycle;
+   \draw [black, fill={rgb,255:red,255; green,107; blue,0 }] (460.0, 1256.3586137523466) -- (495.0, 1316.9803920172574) -- (530.0, 1256.3586137523466) -- cycle;
+   \draw [black, fill={rgb,255:red,212; green,255; blue,0 }] (580.0, 1325.6406460551016) -- (650.0, 1325.6406460551016) -- (615.0, 1265.0188677901908) -- cycle;
+   \draw [black, fill={rgb,255:red,0; green,255; blue,171 }] (580.0, 1325.6406460551016) -- (615.0, 1265.0188677901908) -- (545.0, 1265.0188677901908) -- cycle;
+   \draw [black, fill={rgb,255:red,255; green,107; blue,0 }] (580.0, 1325.6406460551016) -- (545.0, 1265.0188677901908) -- (510.0, 1325.6406460551016) -- cycle;
+   \draw [black, fill={rgb,255:red,235; green,0; blue,255 }] (580.0, 1325.6406460551016) -- (510.0, 1325.6406460551016) -- (545.0, 1386.2624243200123) -- cycle;
+   \draw [black, fill={rgb,255:red,255; green,0; blue,84 }] (580.0, 1325.6406460551016) -- (545.0, 1386.2624243200123) -- (615.0, 1386.2624243200123) -- cycle;
+   \draw [black, fill={rgb,255:red,255; green,107; blue,0 }] (580.0, 1325.6406460551016) -- (615.0, 1386.2624243200123) -- (650.0, 1325.6406460551016) -- cycle;
+   \draw [black, fill={rgb,255:red,255; green,107; blue,0 }] (220.0, 979.2304845413264) -- (290.0, 979.2304845413264) -- (255.0, 918.6087062764157) -- cycle;
+   \draw [black, fill={rgb,255:red,255; green,107; blue,0 }] (220.0, 979.2304845413264) -- (255.0, 918.6087062764157) -- (185.0, 918.6087062764157) -- cycle;
+   \draw [black, fill={rgb,255:red,212; green,255; blue,0 }] (220.0, 979.2304845413264) -- (185.0, 918.6087062764157) -- (150.0, 979.2304845413264) -- cycle;
+   \draw [black, fill={rgb,255:red,255; green,0; blue,84 }] (220.0, 979.2304845413264) -- (150.0, 979.2304845413264) -- (185.0, 1039.8522628062371) -- cycle;
+   \draw [black, fill={rgb,255:red,255; green,0; blue,84 }] (220.0, 979.2304845413264) -- (185.0, 1039.8522628062371) -- (255.0, 1039.8522628062371) -- cycle;
+   \draw [black, fill={rgb,255:red,255; green,0; blue,84 }] (220.0, 979.2304845413264) -- (255.0, 1039.8522628062371) -- (290.0, 979.2304845413264) -- cycle;
+   
+\end{tikzpicture}
+\end{center}
+\caption{Avec des hexagones}
+\end{figure}
+
+\end{frame}
+
+\begin{frame}{Hexagones}
+
+    \begin{figure}[h!]
+    \begin{center}
+    \begin{tikzpicture}[line cap=round,line join=round,>=triangle 45,x=0.08mm,y=0.08mm]
+    \clip (0, 975) rectangle (700, 1667);
+   \draw [black, fill={rgb,255:red,0; green,255; blue,171 }] (460.0, 1256.3586137523466) -- (530.0, 1256.3586137523466) -- (495.0, 1195.7368354874359) -- cycle;
+   \draw [black, fill={rgb,255:red,255; green,0; blue,84 }] (460.0, 1256.3586137523466) -- (495.0, 1195.7368354874359) -- (425.0, 1195.7368354874359) -- cycle;
+   \draw [black, fill={rgb,255:red,235; green,0; blue,255 }] (460.0, 1256.3586137523466) -- (425.0, 1195.7368354874359) -- (390.0, 1256.3586137523466) -- cycle;
+   \draw [black, fill={rgb,255:red,0; green,255; blue,171 }] (460.0, 1256.3586137523466) -- (390.0, 1256.3586137523466) -- (425.0, 1316.9803920172574) -- cycle;
+   \draw [black, fill={rgb,255:red,20; green,255; blue,0 }] (460.0, 1256.3586137523466) -- (425.0, 1316.9803920172574) -- (495.0, 1316.9803920172574) -- cycle;
+   \draw [black, fill={rgb,255:red,255; green,107; blue,0 }] (460.0, 1256.3586137523466) -- (495.0, 1316.9803920172574) -- (530.0, 1256.3586137523466) -- cycle;
+   \draw [black, fill={rgb,255:red,212; green,255; blue,0 }] (580.0, 1325.6406460551016) -- (650.0, 1325.6406460551016) -- (615.0, 1265.0188677901908) -- cycle;
+   \draw [black, fill={rgb,255:red,0; green,255; blue,171 }] (580.0, 1325.6406460551016) -- (615.0, 1265.0188677901908) -- (545.0, 1265.0188677901908) -- cycle;
+   \draw [black, fill={rgb,255:red,255; green,107; blue,0 }] (580.0, 1325.6406460551016) -- (545.0, 1265.0188677901908) -- (510.0, 1325.6406460551016) -- cycle;
+   \draw [black, fill={rgb,255:red,235; green,0; blue,255 }] (580.0, 1325.6406460551016) -- (510.0, 1325.6406460551016) -- (545.0, 1386.2624243200123) -- cycle;
+   \draw [black, fill={rgb,255:red,255; green,0; blue,84 }] (580.0, 1325.6406460551016) -- (545.0, 1386.2624243200123) -- (615.0, 1386.2624243200123) -- cycle;
+   \draw [black, fill={rgb,255:red,255; green,107; blue,0 }] (580.0, 1325.6406460551016) -- (615.0, 1386.2624243200123) -- (650.0, 1325.6406460551016) -- cycle;
+   \draw [black, fill={rgb,255:red,212; green,255; blue,0 }] (100.0, 1325.6406460551016) -- (170.0, 1325.6406460551016) -- (135.0, 1265.0188677901908) -- cycle;
+   \draw [black, fill={rgb,255:red,0; green,255; blue,171 }] (100.0, 1325.6406460551016) -- (135.0, 1265.0188677901908) -- (65.0, 1265.0188677901908) -- cycle;
+   \draw [black, fill={rgb,255:red,235; green,0; blue,255 }] (100.0, 1325.6406460551016) -- (65.0, 1265.0188677901908) -- (30.0, 1325.6406460551016) -- cycle;
+   \draw [black, fill={rgb,255:red,212; green,255; blue,0 }] (100.0, 1325.6406460551016) -- (30.0, 1325.6406460551016) -- (65.0, 1386.2624243200123) -- cycle;
+   \draw [black, fill={rgb,255:red,255; green,107; blue,0 }] (100.0, 1325.6406460551016) -- (65.0, 1386.2624243200123) -- (135.0, 1386.2624243200123) -- cycle;
+   \draw [black, fill={rgb,255:red,212; green,255; blue,0 }] (100.0, 1325.6406460551016) -- (135.0, 1386.2624243200123) -- (170.0, 1325.6406460551016) -- cycle;
+   \draw [black, fill={rgb,255:red,212; green,255; blue,0 }] (580.0, 1741.3328398716321) -- (650.0, 1741.3328398716321) -- (615.0, 1680.7110616067214) -- cycle;
+   \draw [black, fill={rgb,255:red,235; green,0; blue,255 }] (580.0, 1741.3328398716321) -- (615.0, 1680.7110616067214) -- (545.0, 1680.7110616067214) -- cycle;
+   \draw [black, fill={rgb,255:red,255; green,107; blue,0 }] (580.0, 1741.3328398716321) -- (545.0, 1680.7110616067214) -- (510.0, 1741.3328398716321) -- cycle;
+   \draw [black, fill={rgb,255:red,0; green,255; blue,171 }] (580.0, 1741.3328398716321) -- (510.0, 1741.3328398716321) -- (545.0, 1801.9546181365429) -- cycle;
+   \draw [black, fill={rgb,255:red,212; green,255; blue,0 }] (580.0, 1741.3328398716321) -- (545.0, 1801.9546181365429) -- (615.0, 1801.9546181365429) -- cycle;
+   \draw [black, fill={rgb,255:red,0; green,255; blue,171 }] (580.0, 1741.3328398716321) -- (615.0, 1801.9546181365429) -- (650.0, 1741.3328398716321) -- cycle;
+   \draw [black, fill={rgb,255:red,235; green,0; blue,255 }] (460.0, 1394.922678357857) -- (530.0, 1394.922678357857) -- (495.0, 1334.3009000929462) -- cycle;
+   \draw [black, fill={rgb,255:red,20; green,255; blue,0 }] (460.0, 1394.922678357857) -- (495.0, 1334.3009000929462) -- (425.0, 1334.3009000929462) -- cycle;
+   \draw [black, fill={rgb,255:red,255; green,107; blue,0 }] (460.0, 1394.922678357857) -- (425.0, 1334.3009000929462) -- (390.0, 1394.922678357857) -- cycle;
+   \draw [black, fill={rgb,255:red,235; green,0; blue,255 }] (460.0, 1394.922678357857) -- (390.0, 1394.922678357857) -- (425.0, 1455.5444566227677) -- cycle;
+   \draw [black, fill={rgb,255:red,235; green,0; blue,255 }] (460.0, 1394.922678357857) -- (425.0, 1455.5444566227677) -- (495.0, 1455.5444566227677) -- cycle;
+   \draw [black, fill={rgb,255:red,255; green,107; blue,0 }] (460.0, 1394.922678357857) -- (495.0, 1455.5444566227677) -- (530.0, 1394.922678357857) -- cycle;
+   \draw [black, fill={rgb,255:red,0; green,255; blue,171 }] (340.0, 1048.5125168440813) -- (410.0, 1048.5125168440813) -- (375.0, 987.8907385791706) -- cycle;
+   \draw [black, fill={rgb,255:red,20; green,255; blue,0 }] (340.0, 1048.5125168440813) -- (375.0, 987.8907385791706) -- (305.0, 987.8907385791706) -- cycle;
+   \draw [black, fill={rgb,255:red,255; green,0; blue,84 }] (340.0, 1048.5125168440813) -- (305.0, 987.8907385791706) -- (270.0, 1048.5125168440813) -- cycle;
+   \draw [black, fill={rgb,255:red,235; green,0; blue,255 }] (340.0, 1048.5125168440813) -- (270.0, 1048.5125168440813) -- (305.0, 1109.134295108992) -- cycle;
+   \draw [black, fill={rgb,255:red,20; green,255; blue,0 }] (340.0, 1048.5125168440813) -- (305.0, 1109.134295108992) -- (375.0, 1109.134295108992) -- cycle;
+   \draw [black, fill={rgb,255:red,212; green,255; blue,0 }] (340.0, 1048.5125168440813) -- (375.0, 1109.134295108992) -- (410.0, 1048.5125168440813) -- cycle;
+   \draw [black, fill={rgb,255:red,235; green,0; blue,255 }] (340.0, 1187.0765814495915) -- (410.0, 1187.0765814495915) -- (375.0, 1126.4548031846807) -- cycle;
+   \draw [black, fill={rgb,255:red,20; green,255; blue,0 }] (340.0, 1187.0765814495915) -- (375.0, 1126.4548031846807) -- (305.0, 1126.4548031846807) -- cycle;
+   \draw [black, fill={rgb,255:red,255; green,107; blue,0 }] (340.0, 1187.0765814495915) -- (305.0, 1126.4548031846807) -- (270.0, 1187.0765814495915) -- cycle;
+   \draw [black, fill={rgb,255:red,255; green,107; blue,0 }] (340.0, 1187.0765814495915) -- (270.0, 1187.0765814495915) -- (305.0, 1247.6983597145022) -- cycle;
+   \draw [black, fill={rgb,255:red,255; green,0; blue,84 }] (340.0, 1187.0765814495915) -- (305.0, 1247.6983597145022) -- (375.0, 1247.6983597145022) -- cycle;
+   \draw [black, fill={rgb,255:red,235; green,0; blue,255 }] (340.0, 1187.0765814495915) -- (375.0, 1247.6983597145022) -- (410.0, 1187.0765814495915) -- cycle;
+   \draw [black, fill={rgb,255:red,255; green,107; blue,0 }] (220.0, 1394.9226783578565) -- (290.0, 1394.9226783578565) -- (255.0, 1334.3009000929458) -- cycle;
+   \draw [black, fill={rgb,255:red,212; green,255; blue,0 }] (220.0, 1394.9226783578565) -- (255.0, 1334.3009000929458) -- (185.0, 1334.3009000929458) -- cycle;
+   \draw [black, fill={rgb,255:red,212; green,255; blue,0 }] (220.0, 1394.9226783578565) -- (185.0, 1334.3009000929458) -- (150.0, 1394.9226783578565) -- cycle;
+   \draw [black, fill={rgb,255:red,20; green,255; blue,0 }] (220.0, 1394.9226783578565) -- (150.0, 1394.9226783578565) -- (185.0, 1455.5444566227673) -- cycle;
+   \draw [black, fill={rgb,255:red,255; green,107; blue,0 }] (220.0, 1394.9226783578565) -- (185.0, 1455.5444566227673) -- (255.0, 1455.5444566227673) -- cycle;
+   \draw [black, fill={rgb,255:red,235; green,0; blue,255 }] (220.0, 1394.9226783578565) -- (255.0, 1455.5444566227673) -- (290.0, 1394.9226783578565) -- cycle;
+   \draw [black, fill={rgb,255:red,20; green,255; blue,0 }] (100.0, 1464.204710660612) -- (170.0, 1464.204710660612) -- (135.0, 1403.5829323957012) -- cycle;
+   \draw [black, fill={rgb,255:red,255; green,107; blue,0 }] (100.0, 1464.204710660612) -- (135.0, 1403.5829323957012) -- (65.0, 1403.5829323957012) -- cycle;
+   \draw [black, fill={rgb,255:red,20; green,255; blue,0 }] (100.0, 1464.204710660612) -- (65.0, 1403.5829323957012) -- (30.0, 1464.204710660612) -- cycle;
+   \draw [black, fill={rgb,255:red,255; green,0; blue,84 }] (100.0, 1464.204710660612) -- (30.0, 1464.204710660612) -- (65.0, 1524.8264889255227) -- cycle;
+   \draw [black, fill={rgb,255:red,255; green,0; blue,84 }] (100.0, 1464.204710660612) -- (65.0, 1524.8264889255227) -- (135.0, 1524.8264889255227) -- cycle;
+   \draw [black, fill={rgb,255:red,235; green,0; blue,255 }] (100.0, 1464.204710660612) -- (135.0, 1524.8264889255227) -- (170.0, 1464.204710660612) -- cycle;
+   \draw [black, fill={rgb,255:red,235; green,0; blue,255 }] (220.0, 1117.7945491468365) -- (290.0, 1117.7945491468365) -- (255.0, 1057.1727708819258) -- cycle;
+   \draw [black, fill={rgb,255:red,255; green,0; blue,84 }] (220.0, 1117.7945491468365) -- (255.0, 1057.1727708819258) -- (185.0, 1057.1727708819258) -- cycle;
+   \draw [black, fill={rgb,255:red,212; green,255; blue,0 }] (220.0, 1117.7945491468365) -- (185.0, 1057.1727708819258) -- (150.0, 1117.7945491468365) -- cycle;
+   \draw [black, fill={rgb,255:red,255; green,107; blue,0 }] (220.0, 1117.7945491468365) -- (150.0, 1117.7945491468365) -- (185.0, 1178.4163274117473) -- cycle;
+   \draw [black, fill={rgb,255:red,255; green,107; blue,0 }] (220.0, 1117.7945491468365) -- (185.0, 1178.4163274117473) -- (255.0, 1178.4163274117473) -- cycle;
+   \draw [black, fill={rgb,255:red,255; green,107; blue,0 }] (220.0, 1117.7945491468365) -- (255.0, 1178.4163274117473) -- (290.0, 1117.7945491468365) -- cycle;
+   \draw [black, fill={rgb,255:red,235; green,0; blue,255 }] (340.0, 1464.204710660612) -- (410.0, 1464.204710660612) -- (375.0, 1403.5829323957012) -- cycle;
+   \draw [black, fill={rgb,255:red,20; green,255; blue,0 }] (340.0, 1464.204710660612) -- (375.0, 1403.5829323957012) -- (305.0, 1403.5829323957012) -- cycle;
+   \draw [black, fill={rgb,255:red,235; green,0; blue,255 }] (340.0, 1464.204710660612) -- (305.0, 1403.5829323957012) -- (270.0, 1464.204710660612) -- cycle;
+   \draw [black, fill={rgb,255:red,255; green,107; blue,0 }] (340.0, 1464.204710660612) -- (270.0, 1464.204710660612) -- (305.0, 1524.8264889255227) -- cycle;
+   \draw [black, fill={rgb,255:red,255; green,107; blue,0 }] (340.0, 1464.204710660612) -- (305.0, 1524.8264889255227) -- (375.0, 1524.8264889255227) -- cycle;
+   \draw [black, fill={rgb,255:red,235; green,0; blue,255 }] (340.0, 1464.204710660612) -- (375.0, 1524.8264889255227) -- (410.0, 1464.204710660612) -- cycle;
+   \draw [black, fill={rgb,255:red,255; green,107; blue,0 }] (580.0, 1464.204710660612) -- (650.0, 1464.204710660612) -- (615.0, 1403.5829323957012) -- cycle;
+   \draw [black, fill={rgb,255:red,255; green,0; blue,84 }] (580.0, 1464.204710660612) -- (615.0, 1403.5829323957012) -- (545.0, 1403.5829323957012) -- cycle;
+   \draw [black, fill={rgb,255:red,255; green,107; blue,0 }] (580.0, 1464.204710660612) -- (545.0, 1403.5829323957012) -- (510.0, 1464.204710660612) -- cycle;
+   \draw [black, fill={rgb,255:red,255; green,0; blue,84 }] (580.0, 1464.204710660612) -- (510.0, 1464.204710660612) -- (545.0, 1524.8264889255227) -- cycle;
+   \draw [black, fill={rgb,255:red,212; green,255; blue,0 }] (580.0, 1464.204710660612) -- (545.0, 1524.8264889255227) -- (615.0, 1524.8264889255227) -- cycle;
+   \draw [black, fill={rgb,255:red,20; green,255; blue,0 }] (580.0, 1464.204710660612) -- (615.0, 1524.8264889255227) -- (650.0, 1464.204710660612) -- cycle;
+   \draw [black, fill={rgb,255:red,255; green,107; blue,0 }] (100.0, 1187.0765814495915) -- (170.0, 1187.0765814495915) -- (135.0, 1126.4548031846807) -- cycle;
+   \draw [black, fill={rgb,255:red,212; green,255; blue,0 }] (100.0, 1187.0765814495915) -- (135.0, 1126.4548031846807) -- (65.0, 1126.4548031846807) -- cycle;
+   \draw [black, fill={rgb,255:red,255; green,107; blue,0 }] (100.0, 1187.0765814495915) -- (65.0, 1126.4548031846807) -- (30.0, 1187.0765814495915) -- cycle;
+   \draw [black, fill={rgb,255:red,212; green,255; blue,0 }] (100.0, 1187.0765814495915) -- (30.0, 1187.0765814495915) -- (65.0, 1247.6983597145022) -- cycle;
+   \draw [black, fill={rgb,255:red,0; green,255; blue,171 }] (100.0, 1187.0765814495915) -- (65.0, 1247.6983597145022) -- (135.0, 1247.6983597145022) -- cycle;
+   \draw [black, fill={rgb,255:red,235; green,0; blue,255 }] (100.0, 1187.0765814495915) -- (135.0, 1247.6983597145022) -- (170.0, 1187.0765814495915) -- cycle;
+   \draw [black, fill={rgb,255:red,20; green,255; blue,0 }] (340.0, 1602.7687752661222) -- (410.0, 1602.7687752661222) -- (375.0, 1542.1469970012115) -- cycle;
+   \draw [black, fill={rgb,255:red,255; green,107; blue,0 }] (340.0, 1602.7687752661222) -- (375.0, 1542.1469970012115) -- (305.0, 1542.1469970012115) -- cycle;
+   \draw [black, fill={rgb,255:red,20; green,255; blue,0 }] (340.0, 1602.7687752661222) -- (305.0, 1542.1469970012115) -- (270.0, 1602.7687752661222) -- cycle;
+   \draw [black, fill={rgb,255:red,235; green,0; blue,255 }] (340.0, 1602.7687752661222) -- (270.0, 1602.7687752661222) -- (305.0, 1663.390553531033) -- cycle;
+   \draw [black, fill={rgb,255:red,235; green,0; blue,255 }] (340.0, 1602.7687752661222) -- (305.0, 1663.390553531033) -- (375.0, 1663.390553531033) -- cycle;
+   \draw [black, fill={rgb,255:red,235; green,0; blue,255 }] (340.0, 1602.7687752661222) -- (375.0, 1663.390553531033) -- (410.0, 1602.7687752661222) -- cycle;
+   \draw [black, fill={rgb,255:red,0; green,255; blue,171 }] (100.0, 909.9484522385712) -- (170.0, 909.9484522385712) -- (135.0, 849.3266739736605) -- cycle;
+   \draw [black, fill={rgb,255:red,255; green,107; blue,0 }] (100.0, 909.9484522385712) -- (135.0, 849.3266739736605) -- (65.0, 849.3266739736605) -- cycle;
+   \draw [black, fill={rgb,255:red,255; green,0; blue,84 }] (100.0, 909.9484522385712) -- (65.0, 849.3266739736605) -- (30.0, 909.9484522385712) -- cycle;
+   \draw [black, fill={rgb,255:red,212; green,255; blue,0 }] (100.0, 909.9484522385712) -- (30.0, 909.9484522385712) -- (65.0, 970.570230503482) -- cycle;
+   \draw [black, fill={rgb,255:red,20; green,255; blue,0 }] (100.0, 909.9484522385712) -- (65.0, 970.570230503482) -- (135.0, 970.570230503482) -- cycle;
+   \draw [black, fill={rgb,255:red,212; green,255; blue,0 }] (100.0, 909.9484522385712) -- (135.0, 970.570230503482) -- (170.0, 909.9484522385712) -- cycle;
+   \draw [black, fill={rgb,255:red,255; green,0; blue,84 }] (580.0, 1187.0765814495917) -- (650.0, 1187.0765814495917) -- (615.0, 1126.454803184681) -- cycle;
+   \draw [black, fill={rgb,255:red,20; green,255; blue,0 }] (580.0, 1187.0765814495917) -- (615.0, 1126.454803184681) -- (545.0, 1126.454803184681) -- cycle;
+   \draw [black, fill={rgb,255:red,255; green,107; blue,0 }] (580.0, 1187.0765814495917) -- (545.0, 1126.454803184681) -- (510.0, 1187.0765814495917) -- cycle;
+   \draw [black, fill={rgb,255:red,0; green,255; blue,171 }] (580.0, 1187.0765814495917) -- (510.0, 1187.0765814495917) -- (545.0, 1247.6983597145024) -- cycle;
+   \draw [black, fill={rgb,255:red,0; green,255; blue,171 }] (580.0, 1187.0765814495917) -- (545.0, 1247.6983597145024) -- (615.0, 1247.6983597145024) -- cycle;
+   \draw [black, fill={rgb,255:red,235; green,0; blue,255 }] (580.0, 1187.0765814495917) -- (615.0, 1247.6983597145024) -- (650.0, 1187.0765814495917) -- cycle;
+   \draw [black, fill={rgb,255:red,0; green,255; blue,171 }] (340.0, 1325.6406460551016) -- (410.0, 1325.6406460551016) -- (375.0, 1265.0188677901908) -- cycle;
+   \draw [black, fill={rgb,255:red,255; green,0; blue,84 }] (340.0, 1325.6406460551016) -- (375.0, 1265.0188677901908) -- (305.0, 1265.0188677901908) -- cycle;
+   \draw [black, fill={rgb,255:red,235; green,0; blue,255 }] (340.0, 1325.6406460551016) -- (305.0, 1265.0188677901908) -- (270.0, 1325.6406460551016) -- cycle;
+   \draw [black, fill={rgb,255:red,255; green,107; blue,0 }] (340.0, 1325.6406460551016) -- (270.0, 1325.6406460551016) -- (305.0, 1386.2624243200123) -- cycle;
+   \draw [black, fill={rgb,255:red,20; green,255; blue,0 }] (340.0, 1325.6406460551016) -- (305.0, 1386.2624243200123) -- (375.0, 1386.2624243200123) -- cycle;
+   \draw [black, fill={rgb,255:red,255; green,107; blue,0 }] (340.0, 1325.6406460551016) -- (375.0, 1386.2624243200123) -- (410.0, 1325.6406460551016) -- cycle;
+   \draw [black, fill={rgb,255:red,0; green,255; blue,171 }] (460.0, 1117.7945491468365) -- (530.0, 1117.7945491468365) -- (495.0, 1057.1727708819258) -- cycle;
+   \draw [black, fill={rgb,255:red,235; green,0; blue,255 }] (460.0, 1117.7945491468365) -- (495.0, 1057.1727708819258) -- (425.0, 1057.1727708819258) -- cycle;
+   \draw [black, fill={rgb,255:red,212; green,255; blue,0 }] (460.0, 1117.7945491468365) -- (425.0, 1057.1727708819258) -- (390.0, 1117.7945491468365) -- cycle;
+   \draw [black, fill={rgb,255:red,235; green,0; blue,255 }] (460.0, 1117.7945491468365) -- (390.0, 1117.7945491468365) -- (425.0, 1178.4163274117473) -- cycle;
+   \draw [black, fill={rgb,255:red,255; green,0; blue,84 }] (460.0, 1117.7945491468365) -- (425.0, 1178.4163274117473) -- (495.0, 1178.4163274117473) -- cycle;
+   \draw [black, fill={rgb,255:red,255; green,107; blue,0 }] (460.0, 1117.7945491468365) -- (495.0, 1178.4163274117473) -- (530.0, 1117.7945491468365) -- cycle;
+   \draw [black, fill={rgb,255:red,255; green,107; blue,0 }] (220.0, 1256.3586137523466) -- (290.0, 1256.3586137523466) -- (255.0, 1195.7368354874359) -- cycle;
+   \draw [black, fill={rgb,255:red,255; green,107; blue,0 }] (220.0, 1256.3586137523466) -- (255.0, 1195.7368354874359) -- (185.0, 1195.7368354874359) -- cycle;
+   \draw [black, fill={rgb,255:red,235; green,0; blue,255 }] (220.0, 1256.3586137523466) -- (185.0, 1195.7368354874359) -- (150.0, 1256.3586137523466) -- cycle;
+   \draw [black, fill={rgb,255:red,212; green,255; blue,0 }] (220.0, 1256.3586137523466) -- (150.0, 1256.3586137523466) -- (185.0, 1316.9803920172574) -- cycle;
+   \draw [black, fill={rgb,255:red,212; green,255; blue,0 }] (220.0, 1256.3586137523466) -- (185.0, 1316.9803920172574) -- (255.0, 1316.9803920172574) -- cycle;
+   \draw [black, fill={rgb,255:red,235; green,0; blue,255 }] (220.0, 1256.3586137523466) -- (255.0, 1316.9803920172574) -- (290.0, 1256.3586137523466) -- cycle;
+   \draw [black, fill={rgb,255:red,255; green,0; blue,84 }] (460.0, 1533.4867429633669) -- (530.0, 1533.4867429633669) -- (495.0, 1472.864964698456) -- cycle;
+   \draw [black, fill={rgb,255:red,235; green,0; blue,255 }] (460.0, 1533.4867429633669) -- (495.0, 1472.864964698456) -- (425.0, 1472.864964698456) -- cycle;
+   \draw [black, fill={rgb,255:red,235; green,0; blue,255 }] (460.0, 1533.4867429633669) -- (425.0, 1472.864964698456) -- (390.0, 1533.4867429633669) -- cycle;
+   \draw [black, fill={rgb,255:red,20; green,255; blue,0 }] (460.0, 1533.4867429633669) -- (390.0, 1533.4867429633669) -- (425.0, 1594.1085212282776) -- cycle;
+   \draw [black, fill={rgb,255:red,20; green,255; blue,0 }] (460.0, 1533.4867429633669) -- (425.0, 1594.1085212282776) -- (495.0, 1594.1085212282776) -- cycle;
+   \draw [black, fill={rgb,255:red,255; green,107; blue,0 }] (460.0, 1533.4867429633669) -- (495.0, 1594.1085212282776) -- (530.0, 1533.4867429633669) -- cycle;
+   \draw [black, fill={rgb,255:red,255; green,107; blue,0 }] (220.0, 1533.4867429633669) -- (290.0, 1533.4867429633669) -- (255.0, 1472.864964698456) -- cycle;
+   \draw [black, fill={rgb,255:red,255; green,107; blue,0 }] (220.0, 1533.4867429633669) -- (255.0, 1472.864964698456) -- (185.0, 1472.864964698456) -- cycle;
+   \draw [black, fill={rgb,255:red,235; green,0; blue,255 }] (220.0, 1533.4867429633669) -- (185.0, 1472.864964698456) -- (150.0, 1533.4867429633669) -- cycle;
+   \draw [black, fill={rgb,255:red,255; green,0; blue,84 }] (220.0, 1533.4867429633669) -- (150.0, 1533.4867429633669) -- (185.0, 1594.1085212282776) -- cycle;
+   \draw [black, fill={rgb,255:red,255; green,0; blue,84 }] (220.0, 1533.4867429633669) -- (185.0, 1594.1085212282776) -- (255.0, 1594.1085212282776) -- cycle;
+   \draw [black, fill={rgb,255:red,20; green,255; blue,0 }] (220.0, 1533.4867429633669) -- (255.0, 1594.1085212282776) -- (290.0, 1533.4867429633669) -- cycle;
+\end{tikzpicture}
+\end{center}
+\caption{Hexavex résolu}
+\end{figure}
+\end{frame}
+
+\begin{frame}{Hexagones}
+\begin{center}
+    \includegraphics[scale=0.25]{hex.png}
+\end{center}
+\end{frame}
+
+\section{Conclusion}
+
+\begin{frame}{Conclusion}
+
+\begin{overprint}
+
+\onslide<1>
+\begin{center}
+   Nous souhaitons vous remercier pour votre attention !
+\end{center}
+
+\onslide<2>
+\begin{itemize}
+    \item Nous souhaitons également remercier :~\\ \vspace{0,5 cm}
+        \begin{itemize}
+            \item Les conférenciers : Pascal LAFOURCADE et  Cătălin HRIŢCU
+            \item L'équipe des chercheurs
+            \item L'association "Plaisir Maths" ~\\
+        \end{itemize} ~\\
+    pour leur enseignement et leur engagement.
+\end{itemize}
+
+\end{overprint}
+\end{frame}
+
+\subsection{Questions}
+
+\begin{frame}{Questions}
+\begin{center}
+\includegraphics[scale=0.5]{Questions.png}   
+\end{center}
+\end{frame}
+
+%\fi{}
+\end{document}
