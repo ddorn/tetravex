@@ -18,12 +18,14 @@ from main import solve
 from gen import gen
 
 def mean(xs):
+    """Avergage of xs"""
     if xs:
         return sum(xs) / len(xs)
     return 0
 
 def replace_int(string, **x):
-    print(string, x)
+    """Return the integer in the string or if it is a varable name,
+    return the corresponding one from the dict"""
     if string in x:
         return x[string]
     return int(string)
@@ -41,28 +43,32 @@ def generate_params_from_pattern(pattern, start, end):
 
 
 @click.command()
+@click.argument('pattern', default='4 4 x')
 @click.option('-r', '--repetitions', default=10, help='Number of puzzles with the same parameters ro average.')
 @click.option('-a', '--start', default=2, help='Begin of range of parameters')
 @click.option('-b', '--end', default=6, help='End of range of parameters')
-@click.argument('pattern', default='4 4 x')
-def main(pattern, repetitions, start, end):
+@click.option('-x', '--abscisse', default=2, help='Abscisse of the graph. 0=width, 1=height, 2=colors')
+@click.option('-v', '--verbose', is_flag=True, help='Print sat solver output')
+def main(pattern, repetitions, start, end, abscisse, verbose):
     variables, *params_list = list(generate_params_from_pattern(pattern, start, end))
-    print(params_list, variables)
 
     times = defaultdict(list)
 
     for params in params_list:
+        print(params)
         puzzle = gen(*params)
 
         total = 0
 
         for _ in range(repetitions):
             start_time = time()
-            solve(*params, puzzle)
+            solve(*params, puzzle, verbose=verbose)
             end_time = time()
 
             total += end_time - start_time
             times[params].append(end_time - start_time)
+
+        times[params] = times[params][:-4]
 
         # times.append(total / repetitions)
 
@@ -70,28 +76,37 @@ def main(pattern, repetitions, start, end):
     for data in zip(params_list, times.values()):
         print(*data)
 
-    abs_label = 2
+
+    sort_key = pattern.split()[abscisse]
     d = defaultdict(list)
     for l, value in times.items():
-        x = l[abs_label]
+        x = l[abscisse]
         y = value
-        name = l[:abs_label] + l[abs_label + 1:]
 
-        d[name].append((x, y))
+        name = list(l)
+        for i, n in enumerate(reversed(pattern.split())):
+            if n == sort_key:
+                a = name.pop(len(pattern.split()) - i - 1)
+
+        d[tuple(name)].append((x, y))
 
     for name, xys in d.items():
 
         name = list(name)
-        name.insert(abs_label, 'x')
+        for i, n in enumerate(pattern.split()):
+            if n == sort_key:
+                name.insert(i, 'x')
         name = str(tuple(name)).replace("'x'", 'x')
 
         xs = [x for x, d in xys]
         ys = [y for x, y in xys]
         print(name)
-        plt.boxplot(ys, positions=xs, widths=0.03, )
+
+        plt.boxplot(ys, positions=xs, widths=0.03)
         plt.plot(xs, list(map(mean, ys)), label=name)
 
     plt.legend()
+    plt.xticks(list(range(start, end)))
     plt.show()
 
 

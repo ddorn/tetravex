@@ -20,6 +20,7 @@ Matinfoly 2019.
 """
 
 import os
+import subprocess
 
 import click
 
@@ -66,7 +67,7 @@ def gen_unique_tiles_on_spot(n):
                 yield -dim(p1, t, n), -dim(p2, t, n)
 
 
-def gen_adjacents(h, l, c, tiles):
+def gen_adjacents(h, l, c, tiles, donut):
 
     n = len(tiles)
 
@@ -92,15 +93,24 @@ def gen_adjacents(h, l, c, tiles):
                 for t2 in right_incomp[t1]:
                     # yield 'c', '-'*20, p+1, t
                     yield (-dim(p,t1,n), -dim(p+1, t2, n))
+            elif donut:
+                for t2 in right_incomp[t1]:
+                    # yield 'c', '-'*20, p+1, t
+                    yield (-dim(p,t1,n), -dim(p+1-l, t2, n))
+
 
             # Si on est dans la dernière ligne, pas besoin
             # de verifier la compat en bas.
             if i != h - 1:
                 for t2 in bottom_incomp[t1]:
                     yield (-dim(p, t1, n), -dim(p + l, t2, n))
+            elif donut:
+                for t2 in bottom_incomp[t1]:
+                    yield (-dim(p, t1, n), -dim(p % l, t2, n))
 
 
-def solve(h, l, c, tiles):
+
+def solve(h, l, c, tiles, donut=False, verbose=False):
     """
     Get the permutation that solves the given puzzle.
 
@@ -114,7 +124,7 @@ def solve(h, l, c, tiles):
     # generate a list of clause for the DIMACS file
 
     a = list(gen_unique_tiles_on_spot(nb_tiles))
-    b = list(gen_adjacents(h, l, c, tiles))
+    b = list(gen_adjacents(h, l, c, tiles, donut))
     clauses = a + b
 
     # Write the DIMACS file.
@@ -125,7 +135,11 @@ def solve(h, l, c, tiles):
             print(*clause, 0, file=f)
 
     # Let the SAT solver run !
-    os.system("glucose in out")
+    if verbose:
+        os.system('glucose in out')
+    else:
+        os.system('glucose in out -verb=0 > /dev/null')
+
 
     with open('out', 'r') as f:
         out = f.read()
@@ -147,7 +161,9 @@ def solve(h, l, c, tiles):
 @click.command()
 # @click.option('input_file', click.File('r'))
 # @click.option('-s', '--sat-solver', default='glucose', help='SAT solver to use.')
-def main():  # input_file):  #, sat_solver):
+@click.option('-v', '--verbose', is_flag=True)
+@click.option('--donut', is_flag=True)
+def main(verbose, donut):  # input_file):  #, sat_solver):
     """
     Solver for Teraflex.
 
@@ -167,7 +183,7 @@ def main():  # input_file):  #, sat_solver):
     print('Input:')
     print_game(h, l, c, tiles)
 
-    bijection = solve(h, l, c, tiles)
+    bijection = solve(h, l, c, tiles, verbose=verbose, donut=donut)
 
     if bijection:
         print_game(h, l, c, tiles, bijection)

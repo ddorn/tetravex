@@ -141,3 +141,11 @@ def print_game(h, l, c, tiles, order=None):
 # 0x25e3 ◣
 # 0x25e4 ◤
 
+if __name__ == '__main__':
+    h, l = map(int, input().split())
+    nb_tiles = h * l
+    c = int(input())
+    tiles = [list(map(int, input().split())) for _ in range(nb_tiles)]
+
+    print_game(h, l, c, tiles)
+
