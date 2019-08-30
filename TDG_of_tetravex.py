@@ -9,6 +9,7 @@ def decoder(y):
     return (i, j, t)
 
 #Lire l'instance
+b = int(input())
 h = int(input())
 l = int(input())
 
