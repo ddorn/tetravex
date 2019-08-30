@@ -26,6 +26,7 @@ def main():
     c = int(input())
     tiles = [list(map(int, input().split())) for _ in range(NTILES)]
     colors = list(gen_colors(c))
+    space = 1.2
 
     s = r"""
 \begin{figure}[h!]
@@ -39,11 +40,11 @@ def main():
             t = y * l + x
             tile = tiles[t]
 
-            tl = h - y, x
-            tr = h - y, x + 1
-            bl = h - y - 1, x
-            br = h - y - 1, x + 1
-            ctr = h - y - 0.5, x + 0.5
+            tl = h - space * y, space * x
+            tr = h - space * y, space * x + 1
+            bl = h - space * y - 1, space * x
+            br = h - space * y - 1, space * x + 1
+            ctr = h - space * y - 0.5, space * x + 0.5
 
             sommets = [tl, tr, br, bl]
             for i in range(4):
