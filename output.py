@@ -26,10 +26,21 @@ def printfg(txt, fg, end=''):
 
 
 def pprint(txt, fg, bg, end=''):
+    """Print a colored txt"""
     print(f"\033[48;2;{bg[0]};{bg[1]};{bg[2]};38;2;{fg[0]};{fg[1]};{fg[2]}m{txt}\033[m", end=end)
 
 
 def print_tile(tile, y, n=6, label=None):
+    """
+    Print the y-th line of a tile with no newline.
+
+    :tile:
+        A quadruplet of rgb colors
+    :n:
+        size of the tile.
+    """
+    assert 0 <= y < n
+
     t, r, b, l = tile
 
 
@@ -57,28 +68,6 @@ def print_tile(tile, y, n=6, label=None):
             else:
                 printfg(BLC, t)
 
-#     h = n // 2
-#     for x in range(n):
-#         if x <= y - (x >= h):
-#             if n - x <= y + 1:
-#                 printfg(BLC, b)
-#             # elif n - x - 1 == y:
-#             #     pprint(BL, b, l)
-#             else:
-#                 printfg(BLC, l)
-#         # elif x == y:
-#         #     if x < n/2:
-#         #         pprint(TR, t, l)
-#         #     else:
-#         #         pprint(BR, b, r)
-#         else:
-#             if n - x - 1 < y:
-#                 printfg(BLC, r)
-#             # elif n - x - 1 == y:
-#             #     pprint(TL, t, r)
-#             else:
-#                 printfg(BLC, t)
-
 
 def print_game(h, l, c, tiles, order=None):
     """
@@ -90,13 +79,16 @@ def print_game(h, l, c, tiles, order=None):
         Number of colors.
     tiles:
         A list of n*n tiles to place on the board
-        the order is increasing right then down.
+        the order is increasing in reading order.
         A tile is a 4-uplet of colors ranging between 1 and c.
         A color of 0 will be an empty tile.
+    order:
+        The optional permutation of the tiles.
     """
 
-    colors = [(0,0,0)] + list(gen_colors(c))
+    colors = [BLACK] + list(gen_colors(c))
 
+    # reorder if needed
     if order:
         tiles = [tiles[order[i]] for i in range(h*l)]
     else:
@@ -107,41 +99,40 @@ def print_game(h, l, c, tiles, order=None):
         for tile in tiles
     ]
 
-    LINES = 7
+    LINES = 7  # height of a tile
 
+    # Top border
     print(end='╔')
     for x in range(l):
         print('═'*LINES*2, end='╤' if x != l-1 else '╗')
     print()
 
     for y in range(h):
+        # A line of tiles
         for line in range(LINES):
             print(end='║')
             for x in range(l):
                 tile = tiles[y * l + x]
                 print_tile(tile, line, LINES, label=order[y*l + x])
-
                 print(end='║' if x == l-1 else '│')
             print()
 
+        # Separation between lines
         if y != h-1:
             print(end='╟')
             for x in range(l):
                 print('─'*LINES*2, end='┼' if x != l-1 else '╢')
             print()
 
+    # Bottom border
     print(end='╚')
     for x in range(l):
         print('═'*LINES*2, end='╧' if x != l-1 else '╝')
     print()
 
 
-# 0x25e5 ◥
-# 0x25e2 ◢
-# 0x25e3 ◣
-# 0x25e4 ◤
-
 if __name__ == '__main__':
+    # if run as main, print the inputed game
     h, l = map(int, input().split())
     nb_tiles = h * l
     c = int(input())
