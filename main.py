@@ -4,6 +4,22 @@
 Solver for Tetravex.
 
 
+This is the main file for Tetravex solverm created as a group project
+during Mathinfoly 2019. This script is used to solve them, and random puzzles
+can be generated with gen.py, a pretty version of a game's data can be viewed
+inside a terminal with output.py. On can also generate a tikz output with
+tikz_out.py.
+
+Convention for text representation of Tetrevex games:
+    first line:
+        two integers representing the width and height of the board
+    second line:
+        an integer for the numer of colors
+    next width*height lines:
+        4 space-separeted integers for the color of the sides.
+        The first, second, third and fourth integers are respectively
+        the top, right, bottom and left side of a tile.
+
 Convention for SAT variables names:
     Each variable encode a position and a tile.
     Let t be the tile number (between 1 and n*n).
@@ -16,7 +32,10 @@ Convention for SAT variables names:
     Those variables are enough to represent any configuration of a n*n board
     and to solve the Tetravex problem.
 
+By Romain Ageron, Diego Dorn, Yohann D'Anello, Alexia Gross, Elias Suvanto.
 Matinfoly 2019.
+
+GNU GENERAL PUBLIC LICENSE Version 3, 29 June 2007
 """
 
 import os
