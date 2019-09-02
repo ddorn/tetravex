@@ -72,9 +72,9 @@ Or in a more concise way (note that there are shortcuts for every option and fla
 
 ### Screenshots
 
-[Pretty print output](assets/outputsample.png)
+![Pretty print output](assets/outputsample.png)
 
-[](assets/5byx.svg)
+![Plot example](assets/5byx.svg)
 
 ### Conventions
 
