@@ -70,6 +70,11 @@ Or in a more concise way (note that there are shortcuts for every option and fla
 	./bench.py n n c -x 1 -p 2 6 -p 3 10
 
 
+### Screenshots
+
+[Pretty print output](assets/outputsample.png)
+
+[](assets/5byx.svg)
 
 ### Conventions
 
