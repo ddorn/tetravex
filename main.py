@@ -129,13 +129,13 @@ def gen_adjacents(h, l, c, tiles, donut):
 
 
 
-def solve(h, l, c, tiles, donut=False, verbose=False):
+def solve(h, l, c, tiles, donut=False, verbose=False, clean=False):
     """
     Get the permutation that solves the given puzzle.
 
     Return:
         None if not satisfiable
-        f[position] = tile.
+        ret[position] = tile_nb
     """
 
     nb_tiles = h * l
@@ -159,14 +159,19 @@ def solve(h, l, c, tiles, donut=False, verbose=False):
     else:
         os.system('glucose in out -verb=0 > /dev/null')
 
-
     with open('out', 'r') as f:
         out = f.read()
 
+    if clean:
+        os.remove('in')
+        os.remove('out')
+
     # Parsing the result
+
     if 'UNSAT' in out:
         return
 
+    # Building the permutation function
     values = map(int, out.split())
     pairs = {}
     for v in values:
@@ -178,19 +183,33 @@ def solve(h, l, c, tiles, donut=False, verbose=False):
 
 
 @click.command()
-# @click.option('input_file', click.File('r'))
-# @click.option('-s', '--sat-solver', default='glucose', help='SAT solver to use.')
-@click.option('-v', '--verbose', is_flag=True)
-@click.option('--donut', is_flag=True)
-def main(verbose, donut):  # input_file):  #, sat_solver):
+@click.option('-c', '--clean', is_flag=True, help='Remove intermediate files (dimacs in and out)')
+@click.option('-v', '--verbose', is_flag=True, help='Show glucose output')
+@click.option('--donut', is_flag=True, help='Tries to solve the puzzle on a donut, that is, borders on opposite sides must have the same color')
+@click.option('-i', '--hide-input', is_flag=True, help='Remove pretty print of the input before solve')
+@click.option('-b', '--only-bijection', is_flag=True, help='Print only the bijection if there is one. Overrides -v and -i.')
+@click.option('-r', '--only-reorder', is_flag=True, help='Print only the tiles in the right order, in the usual input format.')
+def main(verbose, donut, clean, hide_input, only_bijection, only_reorder):
     """
     Solver for Teraflex.
 
     Input:
-        n: size of the tetravex
-        c: number of colors
-        c1 c2 c3 c4: (n*n lines) top, right, bottom and left side of a tile.
+        - first line:
+            two integers representing the width and height of the board
+        - second line:
+                  an integer for the numer of colors
+        - next width*height lines:
+                4 space-separeted integers for the color of the sides.
+                The first, second, third and fourth integers are respectively
+                the top, right, bottom and left side of a tile.
     """
+
+    if only_bijection and only_reorder:
+        print('--only_reorder and --only_bijection are not compatible, please choose one.')
+        quit(1)
+    if only_bijection or only_reorder:
+        hide_input = True
+        verbose = False
 
     # input
 
@@ -199,24 +218,33 @@ def main(verbose, donut):  # input_file):  #, sat_solver):
     c = int(input())
     tiles = [list(map(int, input().split())) for _ in range(nb_tiles)]
 
-    print('Input:')
-    print_game(h, l, c, tiles)
+    if not hide_input:
+        print('Input:')
+        print_game(h, l, c, tiles)
 
-    bijection = solve(h, l, c, tiles, verbose=verbose, donut=donut)
+    # Computation
+
+    bijection = solve(h, l, c, tiles, verbose=verbose, donut=donut, clean=clean)
+
+    # Output
 
     if bijection:
-        print_game(h, l, c, tiles, bijection)
+        if only_bijection:
+            for y in range(h):
+                for x in range(l):
+                    print('{:>4}'.format(bijection[y*l + x]), end='')
+                print()
+        elif only_reorder:
+            print(h, l)
+            print(c)
+            for p in range(len(tiles)):
+                print(" ".join(map(str, tiles[bijection[p]])))
+        else:
+            print('Solution:')
+            print_game(h, l, c, tiles, bijection)
     else:
         print('no solution')
 
-    # print_game(h, l, c, tiles, pairs) # [tiles[pairs[p]] for p in range(NTILES)], )
-    # # for i in range(NTILES):
-    # #     print(f'Tile {i + 1} is at ({pairs[i] % l}, {pairs[i] // l}).')
-    # with open("output", "w") as f:
-    #     f.write(str(h) + " " + str(l) + "\n")
-    #     f.write(str(c) + "\n")
-    #     for p in range(len(tiles)):
-    #         f.write(" ".join(map(str, tiles[pairs[p]])) + "\n")
 
 
 if __name__ == '__main__':
