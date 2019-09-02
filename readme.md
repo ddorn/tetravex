@@ -37,6 +37,40 @@ In order to get the colors of `output.py` in the terminal right, you will need a
 terminal that supports 24 bits colors our that converts them to 256 bits.
 (in case of doubt, `terminator` is the best of them, your tty should to it too though)
 
+### Examples
+
+Generate a 5 by 5 puzzle with 6 colors
+
+	./gen.py 5 5 6
+
+Generate and solve a random 6x6 puzzle with 6 colors with the donut constraint
+
+	./gen.py 6 6 6 --donut | ./main.py --donut
+
+Show a Tetravex grid
+
+	./output.py < my_grid
+
+Get a perf plot of the impact of the number of colors in a 4 by 4 grid.
+The `absisse=2` flag tells the script to put colors on the `x` axis.
+
+	./bench.py "4 4 c" --abscisse=2
+
+Plot the time taken for a 4 by X with 5 colors, for x in the range `[2, 10[`.
+
+	./bench.py "4 x 5" --abscisse 1 --param-range 2 10
+
+One can also plot multiple curves by varying multple parameters, to get a plot
+of the time taken by n*n grids depending on the number of colors :
+
+	./bench.py n n c --abscisse 1 --param-range 2 6 --param-range 3 10
+
+Or in a more concise way (note that there are shortcuts for every option and flag)
+
+	./bench.py n n c -x 1 -p 2 6 -p 3 10
+
+
+
 ### Conventions
 
 #### Convention for text representation of Tetrevex games

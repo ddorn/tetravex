@@ -31,13 +31,19 @@ def replace_int(string, **x):
     return int(string)
 
 
-def generate_params_from_pattern(pattern, start, end):
+def generate_params_from_pattern(pattern, ranges):
     pattern = pattern.split()
 
     terms = list(set(s for s in pattern if not s.isnumeric()))
+    assert len(ranges) == 1 or len(ranges) == len(terms)
+
     yield terms
 
-    product = itertools.product(*[range(start, end) for t in terms])
+    if len(ranges) == 1:
+        product = itertools.product(*[range(ranges[0][0], ranges[0][1]) for _ in terms])
+    else:
+        product = itertools.product(*[range(start, end) for start, end in ranges])
+
     for parms in product:
         yield tuple(map(lambda s: replace_int(s, **{t: v for t,v in zip(terms, parms)}), pattern))
 
@@ -45,12 +51,34 @@ def generate_params_from_pattern(pattern, start, end):
 @click.command()
 @click.argument('pattern', default='4 4 x')
 @click.option('-r', '--repetitions', default=10, help='Number of puzzles with the same parameters ro average.')
-@click.option('-a', '--start', default=2, help='Begin of range of parameters')
-@click.option('-b', '--end', default=6, help='End of range of parameters')
+@click.option('-p', '--param-range', default=(2, 8), multiple=True, help='Range for the parameters. Pass one or one for each')
 @click.option('-x', '--abscisse', default=2, help='Abscisse of the graph. 0=width, 1=height, 2=colors')
 @click.option('-v', '--verbose', is_flag=True, help='Print sat solver output')
-def main(pattern, repetitions, start, end, abscisse, verbose):
-    variables, *params_list = list(generate_params_from_pattern(pattern, start, end))
+def main(pattern, repetitions, param_range, abscisse, verbose):
+    """
+    Plot performance against various parameters.
+
+    This script is very versatile, one can choose the parameters that varies
+    with the `pattern` string. The pattern is a string with 3 space
+    separated components. The first is the width, then height and number of colors.
+    Each of those can be either an integer, in which case the parametter is fixed
+    or a name for varying parameters.
+
+    There can be more than one varying parameter in which case every combination
+    will be generated. Be careful as the computing time increses rapidely.
+    If a name is used in multiple place (for instance "x x 4") they will allways
+    have the same value. Thus "x x 4" plots the time taken for a N by N grid.
+
+    The range for each parameter can be set with the `--param-range` flag. If
+    only one is passed, then every parameter will have the same range, othewise
+    one need to pass the same number of range than parameter names in the pattern.
+
+
+    If the graph is not looking like a graph, make sure you passed the
+    right `--abscisse` flag.
+    """
+
+    variables, *params_list = list(generate_params_from_pattern(pattern, param_range))
 
     times = defaultdict(list)
 
@@ -106,7 +134,7 @@ def main(pattern, repetitions, start, end, abscisse, verbose):
         plt.plot(xs, list(map(mean, ys)), label=name)
 
     plt.legend()
-    plt.xticks(list(range(start, end)))
+    plt.xticks(xs)
     plt.show()
 
 
